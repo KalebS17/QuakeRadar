@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
             strengthText.textContent = "Seguridad: media";
         } else {
             strengthBar.style.width = "100%";
-            strengthBar.style.backgroundColor = "#4cc9f0"; // azul (buena seguridad)
+            strengthBar.style.backgroundColor = "#a0f1bd"; // verde (buena seguridad)
             strengthText.textContent = "Seguridad: alta";
         }
     });
