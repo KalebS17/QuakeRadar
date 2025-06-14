@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Estilos/registerStyle.css">
+    <style>
+        .password-criteria {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: rgba(255, 0, 0, 0);
+        }
+
+        .password-criteria ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .password-criteria li {
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <div class="register-container">
@@ -24,7 +41,7 @@
                 <label for="name">Nombre</label>
                 <div class="input-with-icon">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="name" placeholder="Ej: Marcos" required>
+                    <input type="text" id="name" placeholder="Ej: Juan" required>
                 </div>
             </div>
 
@@ -32,7 +49,7 @@
                 <label for="surname">Apellidos</label>
                 <div class="input-with-icon">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="surname" placeholder="Ej: Suarez Castro" required>
+                    <input type="text" id="surname" placeholder="Ej: Pérez García" required>
                 </div>
             </div>
 
@@ -48,7 +65,7 @@
                 <label for="phone">Teléfono</label>
                 <div class="input-with-icon">
                     <i class="fas fa-phone"></i>
-                    <input type="tel" id="phone" placeholder="Ej: +506 8456 9473" required>
+                    <input type="tel" id="phone" placeholder="Ej: +34 123 456 789" required>
                 </div>
             </div>
 
@@ -72,6 +89,15 @@
                 <div class="password-strength">
                     <div class="strength-bar" id="strength-bar"></div>
                     <span class="strength-text" id="strength-text">Seguridad: baja</span>
+                </div>
+                <div class="password-criteria">
+                    <ul>
+                        <li id="criteria-length">✔ Al menos 8 caracteres</li>
+                        <li id="criteria-uppercase">✔ Una letra mayúscula</li>
+                        <li id="criteria-lowercase">✔ Una letra minúscula</li>
+                        <li id="criteria-number">✔ Un número</li>
+                        <li id="criteria-special">✔ Un carácter especial</li>
+                    </ul>
                 </div>
             </div>
 
