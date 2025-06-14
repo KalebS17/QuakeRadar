@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Perfil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .body {
+      background: linear-gradient(to right, #D2F8DC, #D2F8DC);
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background-color: #2E4F21;
+      border-right: 1px solid #ddd;
+      width: 280px;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    }
+
+    .user-profile {
+      text-align: center;
+      width: 100%;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #D2F8DC;
+    }
+
+    .upload-label {
+      display: block;
+      margin-top: 12px;
+      color: #D2F8DC;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #uploadPhoto {
+      display: none;
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      width: 100%;
+    }
+
+    .sidebar nav ul li {
+      padding: 0.9rem 1.2rem;
+      transition: background 0.3s ease;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #D2F8DC;
+    }
+
+    .sidebar nav ul li.active,
+    .sidebar nav ul li:hover {
+      background-color: #bde4a752;
+      font-weight: 600;
+    }
+
+    .profile-form {
+      flex: 1;
+      padding: 3rem;
+      background-color: #fff;
+      border-left: 1px solid #eee;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    }
+
+    .profile-form h1 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: #2E4F21;
+    }
+
+    .form-group {
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.85rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #fdfdfd;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+      outline: none;
+    }
+
+    button[type="submit"] {
+      background-color: #2E4F21;
+      color: white;
+      padding: 0.85rem 2rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.1s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #2980b9;
+      transform: translateY(-1px);
+    }
+
+    button {
+      margin-top: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 1rem;
+      }
+    }
+    .sidebar nav ul li a {
+  color: inherit;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sidebar nav ul li a:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="user-profile">
+        <img id="profileImage" src="https://www.w3schools.com/w3images/avatar2.png" alt="Usuario" class="avatar">
+        <label for="uploadPhoto" class="upload-label">Cambiar foto</label>
+        <input type="file" id="uploadPhoto" accept="image/*">
+        <p style="margin-top: 10px; font-weight: 500; color: #fff;">@usuario</p>
+        <button onclick="logout()">Desconectar</button>
+      </div>
+      <nav>
+        <ul>
+          <li class="active">Mi perfil</li>
+          <li><a href="index.html">Inicio</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="profile-form">
+      <h1>Editar Perfil</h1>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="name">Nombre</label>
+          <input type="text" id="name" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label for="birth">Fecha de nacimiento</label>
+          <input type="date" id="birth" max="2024-12-31" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="Nueva contraseña" required>
+        </div>
+        <button type="submit">Guardar cambios</button>
+      </form>
+    </main>
+  </div>
+  <script>
+    document.getElementById('uploadPhoto').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          document.getElementById('profileImage').src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nombre = document.getElementById('name').value;
+      const fecha = document.getElementById('birth').value;
+      const contrasena = document.getElementById('password').value;
+
+      alert('Información guardada:\nNombre: ' + nombre + '\nNacimiento: ' + fecha);
+    });
+
+    function logout() {
+      alert('Sesión cerrada');
+    }
+  </script>
+</body>
+</html>
+
