@@ -1,10 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Exitoso</title>
-    <link rel="stylesheet" href="Estilos/LogInExitoso.css">
+    <link rel="stylesheet" href="{% static 'Estilos/LogInExitoso.css' %}">
 </head>
 <body>
     <!-- Contenedor para el texto de fondo -->
@@ -23,9 +24,9 @@
         </div>
         <h1 class="success-title">¡Login Exitoso!</h1>
         <p class="success-message">Has iniciado sesión correctamente</p>
-        <a href="#" class="home-link">Volver a la página principal</a>
+        <a href="{% url 'index' %}" class="home-link">Volver a la página principal</a>
     </div>
 
-    <script src="JavaScript/LogInExitoso.js"></script>
+    <script src="{% static 'JavaScript/LogInExitoso.js' %}"></script>
 </body>
 </html>

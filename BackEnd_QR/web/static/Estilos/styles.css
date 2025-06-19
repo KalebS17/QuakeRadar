@@ -1,0 +1,240 @@
+/* Variables CSS */
+:root {
+    --primary-color: #2E4F21; /* Azul oscuro para encabezados y fondos */
+    --secondary-color: #2E4F21; /* Azul claro para acentos */
+    --text-color: #000000;
+    --light-text-color: #f8f8f8;
+    --background-light: #D2F8DC; /* Verde claro para fondos de secciones */
+    --background-white: #ffffff;
+    --border-color: #ddd;
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-white);
+    scroll-behavior: smooth; /* Desplazamiento suave al hacer clic en enlaces internos */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Encabezado */
+.header {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    padding: 20px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo i {
+    margin-right: 10px;
+    color: #ffffff; /* Color rojizo para temática de terremotos */
+    font-size: 1.2em;
+    vertical-align: middle;
+}
+
+.logo {
+    font-family: var(--font-heading);
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--light-text-color);
+}
+
+.nav ul {
+    list-style: none;
+}
+
+.nav ul li {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.nav ul li a {
+    color: var(--light-text-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.nav ul li a:hover {
+    color: var(--secondary-color);
+}
+
+/* Sección Hero */
+.hero-section {
+    background: linear-gradient(rgb(160, 241, 189), rgba(160, 241, 189.6)), url('https://via.placeholder.com/1500x600/34495e/ecf0f1?text=Tu+Socio+Financiero') no-repeat center center/cover;
+    color: var(--light-text-color);
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero-section h2 {
+    font-family: var(--font-heading);
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn {
+    display: inline-block;
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #2980b9; /* Un tono más oscuro de secondary-color */
+}
+
+/* Secciones generales */
+section {
+    padding: 80px 0;
+    text-align: center;
+}
+
+section:nth-child(even) { /* Para alternar colores de fondo */
+    background-color: var(--background-light);
+}
+
+h3 {
+    font-family: var(--font-heading);
+    font-size: 2.5em;
+    margin-bottom: 50px;
+    color: var(--primary-color);
+}
+
+/* Sección de Servicios (Cards) */
+.service-cards, .audience-grid, .principles-grid {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.card, .audience-card, .principle-item {
+    background-color: var(--background-white);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: left;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover, .audience-card:hover, .principle-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.card h4, .audience-card h4, .principle-item h4 {
+    font-family: var(--font-heading);
+    font-size: 1.5em;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.audience-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.audience-card ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.audience-card ul li:last-child {
+    border-bottom: none;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    padding: 40px 0;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.footer p {
+    margin-bottom: 10px;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .header .container {
+        flex-direction: column;
+    }
+
+    .nav ul {
+        margin-top: 15px;
+    }
+
+    .nav ul li {
+        margin: 0 10px;
+    }
+
+    .hero-section h2 {
+        font-size: 2.2em;
+    }
+
+    h3 {
+        font-size: 2em;
+    }
+
+    .service-cards, .audience-grid, .principles-grid {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+
+    .card, .audience-card, .principle-item {
+        margin: 0 10px; /* Un poco de margen lateral para que no se peguen a los bordes */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        padding: 60px 20px;
+    }
+
+    .hero-section h2 {
+        font-size: 1.8em;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+
+    h3 {
+        font-size: 1.8em;
+    }
+}
