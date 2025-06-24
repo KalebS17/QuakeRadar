@@ -76,8 +76,16 @@ WSGI_APPLICATION = 'BackEnd_QR.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'mssql',
+        'NAME': 'QuakeRadar',
+        'USER': '',  # tu usuario
+        'PASSWORD': '',  # tu contraseña
+        'HOST': 'localhost',
+        'PORT': '',  # 1433 por defecto
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'trusted_connection': 'yes',
+        },
     }
 }
 

@@ -13,6 +13,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const criteriaNumber = document.getElementById("criteria-number");
     const criteriaSpecial = document.getElementById("criteria-special");
 
+    function isOnlyLetters(str) {
+        return /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/.test(str);
+    }
+
+    function isOnlyNumbers(str) {
+        return /^\d+$/.test(str);
+    }
+
     form.addEventListener("submit", (event) => {
         let isValid = true;
 
@@ -29,9 +37,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.setCustomValidity("");
             }
 
-            // Sanitiza el valor del campo
-            input.value = sanitizeInput(value);
+            // Solo sanitiza si NO es password
+            if (input.type !== "password") {
+                input.value = sanitizeInput(value);
+            }
         });
+
+        // Validar nombre y apellidos
+        const nameValue = document.getElementById("name").value.trim();
+        const surnameValue = document.getElementById("surname").value.trim();
+        if (!isOnlyLetters(nameValue)) {
+            isValid = false;
+            alert("El nombre solo puede contener letras y espacios.");
+        }
+        if (!isOnlyLetters(surnameValue)) {
+            isValid = false;
+            alert("El apellido solo puede contener letras y espacios.");
+        }
+
+        // Validar teléfono
+        const phoneValue = document.getElementById("phone").value.trim();
+        if (!isOnlyNumbers(phoneValue)) {
+            isValid = false;
+            alert("El teléfono solo puede contener números.");
+        }
 
         // Verifica que las contraseñas sean iguales
         const passwordValue = passwordInput.value.trim();
@@ -49,10 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!isValid) {
             event.preventDefault(); // Evita el envío del formulario si hay errores
-            alert("Por favor, completa todos los campos correctamente.");
-        } else {
-            event.preventDefault(); // Evita el envío del formulario para redirigir manualmente
-            window.location.href = "/View/index.html"; // Redirige al usuario a la página de inicio
+            alert("Por favor, corrige los errores antes de continuar.");
         }
     });
 
@@ -115,3 +141,4 @@ document.addEventListener("DOMContentLoaded", () => {
         eyeIcon.classList.toggle("fa-eye-slash");
     });
 });
+
