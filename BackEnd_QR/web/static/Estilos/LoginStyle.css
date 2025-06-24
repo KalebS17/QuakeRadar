@@ -1,10 +1,10 @@
 :root {
-    --primary-color: #2E4F21;
-    --secondary-color: #a0f1bd;
-    --accent-color: #a0f1bd;
+    --primary-color: #008c72;
+    --secondary-color: #2fa98c;
+    --accent-color: #095544;
     --background-light: #f8f9fa;
     --background-white: #ffffff;
-    --text-color: #173540;
+    --text-color: #095544;
     --light-text-color: #ffffff;
     --border-color: #e9ecef;
     --success-color: #4cc9f0;
@@ -18,7 +18,7 @@
 }
 
 body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, #06302B 0%, #17876d 100%);
     font-family: var(--font-main);
     display: flex;
     justify-content: center;
@@ -33,7 +33,7 @@ body {
     background-color: var(--background-white);
     padding: 2.5rem;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.301);
     width: 100%;
     max-width: 420px;
     text-align: center;
@@ -200,18 +200,18 @@ body {
 }
 
 .social-btn.google:hover {
-    color: #db4437;
-    border-color: #db4437;
+    color: #008c72;
+    border-color: #008c72;
 }
 
 .social-btn.faceid {
-    background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+    background: linear-gradient(135deg, #008c72, #06302B);
     color: white;
     border: none;
 }
 
 .social-btn.faceid:hover {
-    background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+    background: linear-gradient(135deg, #aacbc4, #008c72);
     transform: translateY(-3px);
 }
 

@@ -1,11 +1,11 @@
 /* Variables CSS */
 :root {
-    --primary-color: #2E4F21; /* Azul oscuro para encabezados y fondos */
-    --secondary-color: #2E4F21; /* Azul claro para acentos */
-    --text-color: #000000;
-    --light-text-color: #f8f8f8;
-    --background-light: #D2F8DC; /* Verde claro para fondos de secciones */
-    --background-white: #ffffff;
+    --primary-color: #008c72; 
+    --secondary-color: #2CC295; 
+    --text-color: #ddd;
+    --light-text-color: #032221;
+    --background-light: #032221; 
+    --background-white: #03624c;
     --border-color: #ddd;
     --font-heading: 'Montserrat', sans-serif;
     --font-body: 'Open Sans', sans-serif;
@@ -48,7 +48,7 @@ body {
 
 .logo i {
     margin-right: 10px;
-    color: #ffffff; /* Color rojizo para temática de terremotos */
+    color: #ffffff; 
     font-size: 1.2em;
     vertical-align: middle;
 }
@@ -82,7 +82,7 @@ body {
 
 /* Sección Hero */
 .hero-section {
-    background: linear-gradient(rgb(160, 241, 189), rgba(160, 241, 189.6)), url('https://via.placeholder.com/1500x600/34495e/ecf0f1?text=Tu+Socio+Financiero') no-repeat center center/cover;
+    background: linear-gradient(rgb(0, 140, 114), rgba(0, 140, 114)), url('https://via.placeholder.com/1500x600/34495e/ecf0f1?text=Tu+Socio+Financiero') no-repeat center center/cover;
     color: var(--light-text-color);
     text-align: center;
     padding: 100px 20px;
