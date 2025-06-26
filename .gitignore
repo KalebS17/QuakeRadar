@@ -5,3 +5,5 @@ doc
 __pycache__
 venv
 *.pyc
+BackEnd_QR/BackEnd_QR/__pycache__/settings.cpython-313.pyc
+BackEnd_QR/web/__pycache__/urls.cpython-313.pyc

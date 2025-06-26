@@ -19,7 +19,7 @@
             <nav class="nav">
                 <ul>
                     <li><a href="{% url 'register' %}">Registrarse</a></li>
-                    <li><a href="#map">Mapa</a></li>
+                    <li><a href="{% url 'mapa' %}">Mapa</a></li>
                     <li>
                         {% if request.session.user_name %}
                             <a href="{% url 'user_edit' %}">{{ request.session.user_name }}</a>

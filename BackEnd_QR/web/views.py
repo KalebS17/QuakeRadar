@@ -79,3 +79,6 @@ def register(request):
 
     # Para GET (cuando solo visitas la página)
     return render(request, 'register.html')
+
+def mapa(request):
+    return render(request, 'Mapa.html')
