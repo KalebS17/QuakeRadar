@@ -7,17 +7,40 @@ from django.contrib import messages
 def index(request):
     return render(request, 'index.html')
 
+#Funcion para cerrar sesión
+def logout_view(request):
+    request.session.flush()  # Elimina todos los datos de la sesión
+    return redirect('index')  # Redirige a la página de inicio o a donde desees
+
+#FUNCION PARA INICIAR SESION
 def login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT Id, Nombre FROM Usuarios WHERE Correo = %s AND Contraseña = %s
+            """, [email, password])
+            row = cursor.fetchone()
+
+        if row:
+            request.session['user_id'] = row[0]
+            request.session['user_name'] = row[1]  # <-- Aquí debe ser el nombre real del usuario
+            return redirect('login_exitoso')
+        else:
+            messages.error(request, "Correo o contraseña incorrectos.")
     return render(request, 'logIn.html')
 
-def register(request):
-    return render(request, 'register.html')
 
 def login_exitoso(request):
     return render(request, 'logInExitoso.html')
 
 def user_edit(request):
-    return render(request, 'userEdit.html')
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    return render(request, 'UserEdit.html')
 
 #Llamar al store procedure para registrar un usuario
 def register(request):
@@ -56,4 +79,3 @@ def register(request):
 
     # Para GET (cuando solo visitas la página)
     return render(request, 'register.html')
-

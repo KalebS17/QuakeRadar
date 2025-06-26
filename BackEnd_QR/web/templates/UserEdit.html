@@ -169,6 +169,25 @@
   color: inherit;
 }
 
+.logout-btn {
+  display: inline-block;
+  background-color: #2E4F21;
+  color: white;
+  padding: 0.85rem 2rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 15px;
+  transition: background 0.3s ease, transform 0.1s;
+}
+
+.logout-btn:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
 
   </style>
 </head>
@@ -180,7 +199,7 @@
         <label for="uploadPhoto" class="upload-label">Cambiar foto</label>
         <input type="file" id="uploadPhoto" accept="image/*">
         <p style="margin-top: 10px; font-weight: 500; color: #fff;">@usuario</p>
-        <button onclick="logout()">Desconectar</button>
+        <a href="{% url 'logout' %}" class="logout-btn">Cerrar sesión</a>
       </div>
       <nav>
         <ul>
@@ -214,9 +233,20 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function (evt) {
-          document.getElementById('profileImage').src = evt.target.result;
+          const base64 = evt.target.result;
+          document.getElementById('profileImage').src = base64;
+          // Guarda la imagen en sessionStorage
+          sessionStorage.setItem('profileImage', base64);
         };
         reader.readAsDataURL(file);
+      }
+    });
+
+    // Al cargar la página, si hay imagen en sessionStorage, mostrarla
+    window.addEventListener('DOMContentLoaded', function () {
+      const savedImage = sessionStorage.getItem('profileImage');
+      if (savedImage) {
+        document.getElementById('profileImage').src = savedImage;
       }
     });
 
@@ -229,9 +259,7 @@
       alert('Información guardada:\nNombre: ' + nombre + '\nNacimiento: ' + fecha);
     });
 
-    function logout() {
-      alert('Sesión cerrada');
-    }
+    
   </script>
 </body>
 </html>
