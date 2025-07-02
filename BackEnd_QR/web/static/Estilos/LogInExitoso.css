@@ -100,7 +100,7 @@ body {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    background-color: #2E4F21;
+    background-color: #2fa98c;
     margin: 0 auto 2rem;
     display: flex;
     justify-content: center;
@@ -175,7 +175,7 @@ body {
 .home-link {
     display: inline-block;
     padding: 0.8rem 1.5rem;
-    background-color: #2E4F21;
+    background-color: #095544;
     color: white;
     text-decoration: none;
     border-radius: 30px;
@@ -184,7 +184,7 @@ body {
 }
 
 .home-link:hover {
-    background-color: #3e8e41;
+    background-color: #008c72;
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }

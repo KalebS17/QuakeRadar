@@ -1,5 +1,6 @@
 // Inicializa el mapa en San José, Costa Rica
-const map = L.map('map').setView([9.9333, -84.0833], 13);
+const map = L.map('map', { zoomControl: false }).setView([9.9333, -84.0833], 13);
+
 
 // Carga los tiles desde OpenStreetMap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -26,6 +27,26 @@ map.on('locationfound', function (e) {
 
 map.on('locationerror', function () {
   alert('No se pudo obtener tu ubicación');
+});
+
+// Barra de búsqueda con Nominatim
+document.getElementById('search-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const query = document.getElementById('search-input').value;
+  if (!query) return;
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        map.setView([lat, lon], 15);
+        L.marker([lat, lon]).addTo(map).bindPopup(data[0].display_name).openPopup();
+      } else {
+        alert('No se encontró la ubicación.');
+      }
+    })
+    .catch(() => alert('Error al buscar la ubicación.'));
 });
 
 

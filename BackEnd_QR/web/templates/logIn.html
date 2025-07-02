@@ -17,7 +17,13 @@
         </div>
         <h2>Bienvenido de nuevo</h2>
         <p class="subtitle">Inicia sesión para acceder a tu cuenta</p>
-        
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
             <div class="input-group">
@@ -52,11 +58,5 @@
             ¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate aquí</a>
         </div>
     </div>
-
-    {% if messages %}
-        {% for message in messages %}
-        <div class="alert">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
 </body>
 </html>
