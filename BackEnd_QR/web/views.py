@@ -5,6 +5,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
+from datetime import datetime, timedelta, timezone
+import requests
+from django.http import JsonResponse
 
 
 def index(request):
@@ -88,3 +91,42 @@ def register(request):
 
 def mapa(request):
     return render(request, 'Mapa.html')
+
+def fetch_earthquake_data(request):
+    # Zona horaria de Costa Rica (UTC-6)
+    tz_costa_rica = timezone(timedelta(hours=-6))
+
+    # Hora actual en Costa Rica
+    costarica_now = datetime.now(tz_costa_rica)
+    now_utc = costarica_now.astimezone(timezone.utc)
+
+    # Formato ISO8601 para la API
+    endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
+    starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+
+    params = {
+        "format": "geojson",
+        "starttime": starttime,
+        "endtime": endtime,
+    }
+
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query"
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        # Extraer los datos relevantes para el mapa
+        earthquakes = [
+            {
+                "id": feature["id"],
+                "mag": feature["properties"]["mag"],
+                "place": feature["properties"]["place"],
+                "type": feature["properties"]["type"],
+                "time": feature["properties"]["time"],
+                "coordinates": feature["geometry"]["coordinates"],
+            }
+            for feature in data["features"] #usamos list comprehension
+        ]
+        return JsonResponse({"earthquakes": earthquakes})
+    else:
+        return JsonResponse({"error": f"Error al consultar la API: {response.status_code}"}, status=500)

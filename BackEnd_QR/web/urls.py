@@ -10,4 +10,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('mapa/', views.mapa, name='mapa'),
     path('auth/', include('social_django.urls', namespace='social')),
+    path('fetch_earthquake_data/', views.fetch_earthquake_data, name='fetch_earthquake_data'),
 ]
