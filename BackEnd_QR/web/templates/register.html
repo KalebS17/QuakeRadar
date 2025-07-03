@@ -133,9 +133,9 @@
         <div class="social-register">
             <p>O regístrate con:</p>
             <div class="social-buttons">
-                <button class="social-btn google">
+                <a href="{% url 'social:begin' 'google-oauth2' %}" class="social-btn google">
                     <i class="fab fa-google"></i> Google
-                </button>
+                </a>
             </div>
         </div>
     </div>
