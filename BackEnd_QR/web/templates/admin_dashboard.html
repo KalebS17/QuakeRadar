@@ -1,0 +1,262 @@
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+        href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
+
+    <title>Admin Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+</head>
+
+<body>
+    {% load static %}
+    <div class="relative flex size-full min-h-screen flex-col bg-[#008c72] group/design-root overflow-x-hidden"
+        style='font-family: Inter, "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <header
+                class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#095544] px-10 py-3">
+                <div class="flex items-center gap-4 text-[#0e1b18]">
+                    <div class="size-4">
+                        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
+                                fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-[#0e1b18] text-lg font-bold leading-tight tracking-[-0.015em]">Admin {{ request.user.get_full_name|default:request.user.username }}</h2>
+                </div>
+                <div class="flex flex-1 justify-end gap-8">
+                    <div class="flex items-center gap-9">
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'index' %}">Inicio</a>
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'user_edit' %}">Perfil</a>
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'mapa' %}">Mapa</a>
+                    </div>
+                    <button
+                        class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#e7f3f0] text-[#0e1b18] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                        <div class="text-[#0e1b18]" data-icon="Bell" data-size="20px" data-weight="regular">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
+                                viewBox="0 0 256 256">
+                                <path
+                                    d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z">
+                                </path>
+                            </svg>
+                        </div>
+                    </button>
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBA3OlBE8Ayk4Ax13OrhNc4ARCSZsoWmWJuUzfgcr_nEKVCPxjvo2Lk4F61BMTrUJcemQU1JHwPPyBUt9DNuo9jHaRowGhZ6_IsEQO0t2zsy1eTIITxxfzjsKae2JUk1rZ8ES6rEe__x6Y8AGqfycWQA1Y8GRWq5J1ZvnV-ABN6Oc91P4uiPivETuC4-f5ESPPE5DaQvbv5HfigGQw4xpyKv73MHz5pYHzF7ebf0y1SnKxhLJLdSbbhQK-IuVI3ZKinjhjq4DZZSrDz");'>
+                    </div>
+                </div>
+            </header>
+            <div class="px-40 flex flex-1 justify-center py-5">
+                <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+                    <div class="flex flex-wrap justify-between gap-3 p-4">
+                        <p class="text-[#0e1b18] tracking-light text-[32px] font-bold leading-tight min-w-72">Dashboard
+                        </p>
+                    </div>
+                    <h2 class="text-[#0e1b18] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+                        Visiting Users</h2>
+                    <div class="px-4 py-3 @container">
+                        <div class="flex overflow-hidden rounded-lg border border-[#d0e7e2] bg-[#f8fcfb]">
+                            <table class="flex-1">
+                                <thead>
+                                    <tr class="bg-[#f8fcfb]">
+                                        <th
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            User ID</th>
+                                        <th
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Name</th>
+                                        <th
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Email</th>
+                                        <th
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Last Visit
+                                        </th>
+                                        <th
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in visiting_users %}
+                                    <tr class="border-t border-t-[#d0e7e2]">
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ user.id }}</td>
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ user.name }}
+                                        </td>
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ user.email }}
+                                        </td>
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            -
+                                        </td>
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            Delete
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <style>
+                            @container(max-width:120px) {
+                                .table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:240px) {
+                                .table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:360px) {
+                                .table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:480px) {
+                                .table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:600px) {
+                                .table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 {
+                                    display: none;
+                                }
+                            }
+                        </style>
+                    </div>
+                    <h2 class="text-[#0e1b18] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
+                        News Management</h2>
+                    <div class="flex px-4 py-3 justify-start">
+                        <button
+                            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#095544] text-[#f8fcfb] text-sm font-bold leading-normal tracking-[0.015em]">
+                            <span class="truncate">Add News</span>
+                        </button>
+                    </div>
+                    <div class="px-4 py-3 @container">
+                        <div class="flex overflow-hidden rounded-lg border border-[#d0e7e2] bg-[#f8fcfb]">
+                            <table class="flex-1">
+                                <thead>
+                                    <tr class="bg-[#f8fcfb]">
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Title</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Content</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Date</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-t border-t-[#d0e7e2]">
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
+                                            New Product Launch
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            We are excited to announce the launch of our new product line.
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            2024-01-21
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            Edit | Delete
+                                        </td>
+                                    </tr>
+                                    <tr class="border-t border-t-[#d0e7e2]">
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
+                                            Company Update
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            An update on recent company developments and future plans.
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            2024-01-15
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            Edit | Delete
+                                        </td>
+                                    </tr>
+                                    <tr class="border-t border-t-[#d0e7e2]">
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
+                                            Holiday Schedule
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            Important information regarding our holiday schedule.
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            2023-12-20
+                                        </td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            Edit | Delete
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <style>
+                            @container(max-width:120px) {
+                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:240px) {
+                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:360px) {
+                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 {
+                                    display: none;
+                                }
+                            }
+
+                            @container(max-width:480px) {
+                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 {
+                                    display: none;
+                                }
+                            }
+                        </style>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -9,10 +9,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 const redIcon = L.icon({
-  iconUrl: '/static/images/location.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
+  iconUrl: '/static/images/AlfilerGif.gif',
+  iconSize: [20, 32],
+  iconAnchor: [10, 32],
+  popupAnchor: [1, -28],
 });
 
 // Funciones de botones

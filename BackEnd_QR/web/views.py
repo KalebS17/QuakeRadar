@@ -2,9 +2,12 @@ import re
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
+from django.db import connection
+
+from django.contrib.auth.decorators import login_required, user_passes_test
 from datetime import datetime, timedelta, timezone
 import requests
 from django.http import JsonResponse
@@ -24,6 +27,7 @@ def login(request):
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
 
+        # 1. Busca en Usuarios
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT Id, Nombre FROM Usuarios WHERE Correo = %s AND Contraseña = %s
@@ -31,16 +35,37 @@ def login(request):
             row = cursor.fetchone()
 
         if row:
-            # Busca o crea el usuario de Django para autenticarlo
             user, created = User.objects.get_or_create(
                 username=email,
                 defaults={'first_name': row[1], 'email': email}
             )
-            user.backend = 'django.contrib.auth.backends.ModelBackend'  # <--- ESTA LÍNEA
-            auth_login(request, user)  # Autentica en Django
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            auth_login(request, user)
             return redirect('login_exitoso')
-        else:
-            messages.error(request, "Correo o contraseña incorrectos.")
+
+        # 2. Si no está en Usuarios, busca en admin
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT Id, Nombre FROM admin WHERE Correo = %s AND Contraseña = %s
+            """, [email, password])
+            admin_row = cursor.fetchone()
+
+        if admin_row:
+            # Puedes usar un username especial para distinguir admins
+            admin_username = f"admin_{email}"
+            user, created = User.objects.get_or_create(
+                username=admin_username,
+                defaults={'first_name': admin_row[1], 'email': email, 'is_staff': True, 'is_superuser': True}
+            )
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            user.backend = 'django.contrib.auth.backends.ModelBackend'
+            auth_login(request, user)
+            return redirect('admin_dashboard')  # O la página que quieras para admins
+
+        # Si no está en ninguna tabla
+        messages.error(request, "Correo o contraseña incorrectos.")
     return render(request, 'logIn.html')
 
 
@@ -130,3 +155,26 @@ def fetch_earthquake_data(request):
         return JsonResponse({"earthquakes": earthquakes})
     else:
         return JsonResponse({"error": f"Error al consultar la API: {response.status_code}"}, status=500)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def admin_dashboard(request):
+    # Usuarios de la tabla Usuarios
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT Id, Nombre, Correo FROM Usuarios")
+        usuarios = [
+            {"id": row[0], "name": row[1], "email": row[2]}
+            for row in cursor.fetchall()
+        ]
+
+    # Usuarios de auth_user
+    auth_users = User.objects.all().values("id", "first_name", "email")
+    auth_users_list = [
+        {"id": u["id"], "name": u["first_name"], "email": u["email"]}
+        for u in auth_users
+    ]
+
+    # Unir ambas listas
+    all_users = usuarios + auth_users_list
+
+    return render(request, 'admin_dashboard.html', {"visiting_users": all_users})

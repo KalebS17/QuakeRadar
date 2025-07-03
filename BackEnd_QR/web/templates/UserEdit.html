@@ -26,7 +26,7 @@
     }
 
     .sidebar {
-      background-color: #2E4F21;
+      background-color: #095544;
       border-right: 1px solid #ddd;
       width: 280px;
       padding: 2rem 1rem;
@@ -92,7 +92,7 @@
     .profile-form h1 {
       font-size: 2rem;
       margin-bottom: 2rem;
-      color: #2E4F21;
+      color: #095544;
     }
 
     .form-group {
@@ -125,7 +125,7 @@
     }
 
     button[type="submit"] {
-      background-color: #2E4F21;
+      background-color: #095544;
       color: white;
       padding: 0.85rem 2rem;
       border: none;
@@ -171,7 +171,7 @@
 
 .logout-btn {
   display: inline-block;
-  background-color: #2E4F21;
+  background-color: #095544;
   color: white;
   padding: 0.85rem 2rem;
   border: none;
@@ -198,13 +198,14 @@
         <img id="profileImage" src="https://www.w3schools.com/w3images/avatar2.png" alt="Usuario" class="avatar">
         <label for="uploadPhoto" class="upload-label">Cambiar foto</label>
         <input type="file" id="uploadPhoto" accept="image/*">
-        <p style="margin-top: 10px; font-weight: 500; color: #fff;">@usuario</p>
+        <p style="margin-top: 10px; font-weight: 500; color: #fff;">{{ request.user.get_full_name|default:request.user.username }}</p>
         <a href="{% url 'logout' %}" class="logout-btn">Cerrar sesión</a>
       </div>
       <nav>
         <ul>
           <li class="active">Mi perfil</li>
-          <li><a href="index.html">Inicio</a></li>
+          <li><a href="{% url 'index' %}">Inicio</a></li>
+          <li><a href="{% url 'admin_dashboard'%}">Dashboard</a></li>
         </ul>
       </nav>
     </aside>

@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,12 +81,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'QuakeRadar',
-        'USER': 'sa',  # tu usuario
-        'PASSWORD': 'Mv26mb26',  # tu contraseña
+        'USER': '',  # tu usuario
+        'PASSWORD': '',  # tu contraseña
         'HOST': 'localhost',
-        'PORT': '1433',  # 1433 por defecto
+        'PORT': '',  # 1433 por defecto
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
+            'trusted_connection': 'yes',
         },
     }
 }
@@ -139,11 +139,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'web/static'),
-]
+STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
