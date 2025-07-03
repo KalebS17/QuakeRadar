@@ -2,6 +2,9 @@ import re
 from django.shortcuts import render, redirect
 from django.db import connection
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login
+from django.contrib.auth.models import User
 
 
 def index(request):
@@ -25,8 +28,13 @@ def login(request):
             row = cursor.fetchone()
 
         if row:
-            request.session['user_id'] = row[0]
-            request.session['user_name'] = row[1]  # <-- Aquí debe ser el nombre real del usuario
+            # Busca o crea el usuario de Django para autenticarlo
+            user, created = User.objects.get_or_create(
+                username=email,
+                defaults={'first_name': row[1], 'email': email}
+            )
+            user.backend = 'django.contrib.auth.backends.ModelBackend'  # <--- ESTA LÍNEA
+            auth_login(request, user)  # Autentica en Django
             return redirect('login_exitoso')
         else:
             messages.error(request, "Correo o contraseña incorrectos.")
@@ -36,10 +44,8 @@ def login(request):
 def login_exitoso(request):
     return render(request, 'logInExitoso.html')
 
+@login_required
 def user_edit(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        return redirect('login')
     return render(request, 'UserEdit.html')
 
 #Llamar al store procedure para registrar un usuario

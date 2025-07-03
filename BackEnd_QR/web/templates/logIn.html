@@ -17,7 +17,13 @@
         </div>
         <h2>Bienvenido de nuevo</h2>
         <p class="subtitle">Inicia sesión para acceder a tu cuenta</p>
-        
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
         <form method="POST">
             {% csrf_token %}
             <div class="input-group">
@@ -40,9 +46,9 @@
         <div class="divider">o continúa con</div>
         
         <div class="social-login">
-            <div class="social-btn google" title="Iniciar con Google">
+            <a href="{% url 'social:begin' 'google-oauth2' %}" class="social-btn google" title="Iniciar con Google">
                 <i class="fab fa-google"></i>
-            </div>
+            </a>
             <div class="social-btn faceid" title="Iniciar con Face ID">
                 <i class="fas fa-user-shield"></i>
             </div>
@@ -52,11 +58,5 @@
             ¿No tienes una cuenta? <a href="{% url 'register' %}">Regístrate aquí</a>
         </div>
     </div>
-
-    {% if messages %}
-        {% for message in messages %}
-        <div class="alert">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
 </body>
 </html>

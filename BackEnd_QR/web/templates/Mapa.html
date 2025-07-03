@@ -27,19 +27,12 @@
         <div class="max-w-[960px] w-full">
           <div class="flex flex-col h-full gap-4">
             <!-- Buscador del mapa -->
-            <label class="flex flex-col min-w-40 h-12">
-              <div class="flex items-stretch h-full rounded-lg">
-                <div class="bg-neutral-50 text-neutral-500 flex items-center justify-center pl-4 rounded-l-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
-                    <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" />
-                  </svg>
-                </div>
-                <input
-                  placeholder="Search for places or addresses"
-                  class="form-input w-full px-4 text-base text-[#141414] bg-neutral-50 border-none focus:outline-0 rounded-r-lg placeholder:text-neutral-500"
-                />
-              </div>
-            </label>
+            <div id="search-bar" style="position:fixed;top:24px;right:1%;transform:translateX(-50%);z-index:1100;width:350px;max-width:90%;">
+              <form id="search-form" style="display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);overflow:hidden;">
+                <input id="search-input" type="text" placeholder="Buscar lugar o dirección..." style="flex:1;padding:10px;border:none;outline:none;font-size:1rem;">
+                <button type="submit" style="background:#095544;color:#fff;border:none;padding:0 16px;cursor:pointer;">Buscar</button>
+              </form>
+            </div>
 
             <!-- Contenedor del mapa -->
             <div id="map"></div>
@@ -62,6 +55,20 @@
                 </svg>
               </button>
             </div>
+
+            <!-- Botón de menú en la esquina superior derecha -->
+            <div id="menu-container" style="position: fixed; top: 24px; right: 32px; z-index: 1001;">
+              <button id="menu-toggle" style="background: #095544; border-radius: 50%; width: 48px; height: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: none; cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="#fff" viewBox="0 0 256 256">
+                  <circle cx="128" cy="64" r="16"/><circle cx="128" cy="128" r="16"/><circle cx="128" cy="192" r="16"/>
+                </svg>
+              </button>
+              <div id="menu-dropdown" style="display: none; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-top: 8px; min-width: 140px; padding: 8px 0;">
+                <a href="#" style="display: block; padding: 10px 20px; color: #222; text-decoration: none;">Settings</a>
+                <a href="#" style="display: block; padding: 10px 20px; color: #222; text-decoration: none;">Settingsss</a>
+                <a href="#" style="display: block; padding: 10px 20px; color: #222; text-decoration: none;">Settingssss</a>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -70,5 +77,18 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{% static 'JavaScript/map.js' %}"></script>
+    <script>
+      const menuToggle = document.getElementById('menu-toggle');
+      const menuDropdown = document.getElementById('menu-dropdown');
+      menuToggle.addEventListener('click', () => {
+        menuDropdown.style.display = menuDropdown.style.display === 'block' ? 'none' : 'block';
+      });
+      // Opcional: cerrar el menú al hacer click fuera
+      document.addEventListener('click', (e) => {
+        if (!menuToggle.contains(e.target) && !menuDropdown.contains(e.target)) {
+          menuDropdown.style.display = 'none';
+        }
+      });
+    </script>
   </body>
 </html>
