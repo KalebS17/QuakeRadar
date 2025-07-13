@@ -20,6 +20,7 @@
                 <ul>
                     <li><a href="{% url 'register' %}">Registrarse</a></li>
                     <li><a href="{% url 'mapa' %}">Mapa</a></li>
+                    <li><a href="{% url 'news_generator' %}">News</a></li>
                     <li>
                         {% if request.user.is_authenticated %}
                             <a href="{% url 'user_edit' %}">{{ request.user.get_full_name|default:request.user.username }}</a>

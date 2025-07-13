@@ -12,4 +12,6 @@ urlpatterns = [
     path('auth/', include('social_django.urls', namespace='social')),
     path('fetch_earthquake_data/', views.fetch_earthquake_data, name='fetch_earthquake_data'),
     path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
+    path('guardar_terremotos/', views.save_earthquake_data, name='save_earthquake_data'),
+    path('news-generator/', views.news_generator, name='news_generator')
 ]

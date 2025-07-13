@@ -5,12 +5,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
-from django.db import connection
-
-from django.contrib.auth.decorators import login_required, user_passes_test
 from datetime import datetime, timedelta, timezone
 import requests
 from django.http import JsonResponse
+from django.http import HttpResponse
+import random
 
 
 def index(request):
@@ -117,6 +116,9 @@ def register(request):
 def mapa(request):
     return render(request, 'Mapa.html')
 
+
+
+#funcion para obtener los datos de la API de terremotos
 def fetch_earthquake_data(request):
     # Zona horaria de Costa Rica (UTC-6)
     tz_costa_rica = timezone(timedelta(hours=-6))
@@ -178,3 +180,69 @@ def admin_dashboard(request):
     all_users = usuarios + auth_users_list
 
     return render(request, 'admin_dashboard.html', {"visiting_users": all_users})
+
+
+#Funcion para Guardar Terremotos en la DB
+def save_earthquake_data(request):
+    # Zona horaria de Costa Rica
+    tz_costa_rica = timezone(timedelta(hours=-6))
+    costarica_now = datetime.now(tz_costa_rica)
+    now_utc = costarica_now.astimezone(timezone.utc)
+
+    endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
+    starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+
+    params = {
+        "format": "geojson",
+        "starttime": starttime,
+        "endtime": endtime,
+    }
+
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query"
+    response = requests.get(url, params=params)
+
+    if response.status_code != 200:
+        return HttpResponse(f"Error al consultar la API: {response.status_code}", status=500)
+
+    data = response.json()
+    earthquakes = [
+        {
+            "id": feature["id"],
+            "mag": feature["properties"]["mag"],
+            "place": feature["properties"]["place"],
+            "type": feature["properties"]["type"],
+            "time": feature["properties"]["time"],
+            "coordinates": feature["geometry"]["coordinates"],
+        }
+        for feature in data["features"]
+    ]
+
+    sample = random.sample(earthquakes, min(7, len(earthquakes)))
+
+    saved_count = 0
+
+    with connection.cursor() as cursor:
+        for eq in sample:
+            lon, lat, depth = eq["coordinates"]
+            mag = eq["mag"]
+            time = datetime.utcfromtimestamp(eq["time"] / 1000)
+
+            cursor.execute("""
+                SELECT COUNT(*) FROM dbo.Terremoto
+                WHERE latitud = %s AND longitud = %s AND fecha_hora = %s
+            """, [lat, lon, time])
+            exists = cursor.fetchone()[0]
+
+            if exists == 0:
+                cursor.execute("""
+                    INSERT INTO dbo.Terremoto (latitud, longitud, magnitud, profundidad, fecha_hora)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, [lat, lon, mag, depth, time])
+                saved_count += 1
+
+    return HttpResponse(f"{saved_count} terremotos guardados correctamente.")
+
+
+def news_generator(request):
+    return render(request, 'news.html')
+
