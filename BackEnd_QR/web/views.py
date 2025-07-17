@@ -10,7 +10,8 @@ import requests
 from django.http import JsonResponse
 from django.http import HttpResponse
 import random
-
+from dotenv import load_dotenv
+import os
 
 def index(request):
     return render(request, 'index.html')
@@ -217,32 +218,133 @@ def save_earthquake_data(request):
         for feature in data["features"]
     ]
 
-    sample = random.sample(earthquakes, min(7, len(earthquakes)))
-
     saved_count = 0
-
     with connection.cursor() as cursor:
-        for eq in sample:
-            lon, lat, depth = eq["coordinates"]
-            mag = eq["mag"]
-            time = datetime.utcfromtimestamp(eq["time"] / 1000)
-
-            cursor.execute("""
-                SELECT COUNT(*) FROM dbo.Terremoto
-                WHERE latitud = %s AND longitud = %s AND fecha_hora = %s
-            """, [lat, lon, time])
-            exists = cursor.fetchone()[0]
-
-            if exists == 0:
+        for eq in earthquakes:
+            try:
+                lon, lat, depth = eq["coordinates"]
+                mag = eq["mag"]
+                time = datetime.utcfromtimestamp(eq["time"] / 1000)
                 cursor.execute("""
-                    INSERT INTO dbo.Terremoto (latitud, longitud, magnitud, profundidad, fecha_hora)
-                    VALUES (%s, %s, %s, %s, %s)
-                """, [lat, lon, mag, depth, time])
-                saved_count += 1
-
+                    SELECT COUNT(*) FROM dbo.Terremoto
+                    WHERE latitud = %s AND longitud = %s AND fecha_hora = %s
+                """, [lat, lon, time])
+                exists = cursor.fetchone()[0]
+                if exists == 0:
+                    cursor.execute("""
+                        INSERT INTO dbo.Terremoto (latitud, longitud, magnitud, profundidad, fecha_hora)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, [lat, lon, mag, depth, time])
+                    saved_count += 1
+            except Exception as e:
+                print(f"Error al guardar terremoto: {e}")
     return HttpResponse(f"{saved_count} terremotos guardados correctamente.")
 
+# Punto 2: Obtener terremotos aleatorios de la base de datos
+def get_random_earthquakes_db():
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT TOP 50 latitud, longitud, magnitud, profundidad, fecha_hora
+            FROM dbo.Terremoto
+            ORDER BY NEWID()
+        """)
+        rows = cursor.fetchall()
+    sample = random.sample(rows, min(7, len(rows)))
+    terremotos = [
+        {
+            "latitud": row[0],
+            "longitud": row[1],
+            "magnitud": row[2],
+            "profundidad": row[3],
+            "fecha_hora": row[4],
+        }
+        for row in sample
+    ]
+    return terremotos
+
+
+def generar_noticia(terremoto):
+    mag = terremoto['magnitud']
+    autores = [
+        "Redacción QuakeRadar",
+        "Agencia Sísmica Nacional",
+        "Reporte Especial",
+        "Equipo de Noticias",
+        "Observatorio Sismológico",
+        "Corresponsal Local",
+        "Centro de Monitoreo"
+    ]
+    autor = random.choice(autores)
+    # Generar fecha de publicación aleatoria (entre 1 minuto y 48 horas después del incidente)
+    fecha_incidente = terremoto['fecha_hora']
+    if isinstance(fecha_incidente, str):
+        try:
+            fecha_incidente = datetime.fromisoformat(str(fecha_incidente))
+        except Exception:
+            fecha_incidente = datetime.now()
+    min_offset = timedelta(minutes=1)
+    max_offset = timedelta(hours=48)
+    offset = min_offset + (max_offset - min_offset) * random.random()
+    fecha_publicacion = fecha_incidente + offset
+    fecha_publicacion_str = fecha_publicacion.strftime('%Y-%m-%d %H:%M')
+    if mag < 3.0:
+        titulos = [
+            f"Sismo leve registrado (Magnitud {mag})",
+            f"Pequeño temblor detectado en la región (Mag. {mag})",
+            f"Movimiento sísmico menor sin afectaciones (Mag. {mag})"
+        ]
+        cuerpos = [
+            f"Un sismo de baja magnitud ({mag}) fue detectado el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. No se reportan daños ni afectaciones.",
+            f"Se registró un temblor leve de magnitud {mag} el {terremoto['fecha_hora']}. El evento pasó desapercibido para la mayoría de la población.",
+            f"Un pequeño sismo ocurrió el {terremoto['fecha_hora']} con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Sin consecuencias para la comunidad. Magnitud reportada: {mag}."
+        ]
+    elif mag < 5.0:
+        titulos = [
+            f"Terremoto moderado sacude la zona (Magnitud {mag})",
+            f"Sismo de magnitud intermedia sorprende a habitantes (Mag. {mag})",
+            f"Temblor causa inquietud en la comunidad (Mag. {mag})"
+        ]
+        cuerpos = [
+            f"Un terremoto de magnitud {mag} se registró el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se sintió en varias comunidades, pero no se reportan daños graves.",
+            f"El {terremoto['fecha_hora']} se produjo un sismo de magnitud {mag} que generó inquietud entre los habitantes locales.",
+            f"Un temblor moderado sacudió la zona el {terremoto['fecha_hora']}, sin consecuencias graves reportadas. Magnitud registrada: {mag}."
+        ]
+    elif mag < 7.0:
+        titulos = [
+            f"Fuerte sismo genera alarma (Magnitud {mag})",
+            f"Terremoto intenso sacude la región (Mag. {mag})",
+            f"Sismo de gran magnitud alerta a la población (Mag. {mag})"
+        ]
+        cuerpos = [
+            f"Un fuerte terremoto de magnitud {mag} sacudió la región el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Las autoridades recomiendan precaución ante posibles réplicas.",
+            f"El {terremoto['fecha_hora']} se registró un sismo de gran magnitud ({mag}) que generó alarma en la población.",
+            f"Un terremoto intenso fue percibido el {terremoto['fecha_hora']}, con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Magnitud: {mag}."
+        ]
+    else:
+        titulos = [
+            f"Terremoto devastador impacta el área (Magnitud {mag})",
+            f"Sismo de extrema magnitud causa daños significativos (Mag. {mag})",
+            f"Evento sísmico mayor afecta la región (Mag. {mag})"
+        ]
+        cuerpos = [
+            f"Un terremoto de gran magnitud ({mag}) ocurrió el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se reportan daños significativos y se recomienda seguir las indicaciones de las autoridades.",
+            f"El {terremoto['fecha_hora']} se produjo un sismo devastador de magnitud {mag}, con afectaciones en varias zonas.",
+            f"Un evento sísmico mayor sacudió la región el {terremoto['fecha_hora']}, generando preocupación y daños materiales. Magnitud: {mag}."
+        ]
+    titulo = random.choice(titulos)
+    cuerpo = random.choice(cuerpos)
+    return {"titulo": titulo, "autor": autor, "cuerpo": cuerpo, "fecha_publicacion": fecha_publicacion_str}
+
+def procesar_noticia(noticia_texto):
+    partes = noticia_texto.split('\n')
+    titulo = partes[0] if len(partes) > 0 else "Título no disponible"
+    autor = partes[1] if len(partes) > 1 else "Autor no disponible"
+    cuerpo = "\n".join(partes[2:]) if len(partes) > 2 else ""
+    return {"titulo": titulo, "autor": autor, "cuerpo": cuerpo}
 
 def news_generator(request):
-    return render(request, 'news.html')
-
+    terremotos = get_random_earthquakes_db()
+    if not terremotos:
+        return render(request, "news.html", {"noticias": [], "mensaje": "No hay terremotos en la base de datos."})
+    noticias = [generar_noticia(t) for t in terremotos]
+    return render(request, "news.html", {"noticias": noticias})

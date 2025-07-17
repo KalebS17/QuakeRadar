@@ -5,7 +5,7 @@
     <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
         href="https://fonts.googleapis.com/css2?display=swap&amp;family=Newsreader%3Awght%40400%3B500%3B700%3B800&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" />
 
-    <title>Noticas</title>
+    <title>Noticias</title>
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -43,128 +43,31 @@
             <div class="px-40 flex flex-1 justify-center py-5">
                 <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
                     <div class="flex flex-wrap justify-between gap-3 p-4">
-                        <p class="text-[#0e1b18] tracking-light text-[32px] font-bold leading-tight min-w-72">Panel de Noticas
+                        <p class="text-[#0e1b18] tracking-light text-[32px] font-bold leading-tight min-w-72">Panel de
+                            Noticas
                         </p>
                     </div>
+                    {% for noticia in noticias %}
                     <div class="p-4">
                         <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
                             onclick="handleClick(this)">
                             <div class="flex flex-col gap-1 flex-[2_2_0px]">
                                 <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
+                                    {{ noticia.titulo }}
                                 </p>
                                 <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
+                                    {{ noticia.autor }}
                                 </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
+                                <p class="text-[#4e9788] text-xs font-normal leading-normal">
+                                    Publicado: {{ noticia.fecha_publicacion }}
+                                </p>
+                                <p class="text-[#0e1b18] text-sm font-normal leading-normal">
+                                    {{ noticia.cuerpo|linebreaksbr }}
+                                </p>
                             </div>
                         </div>
                     </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-stretch justify-between gap-4 rounded-xl cursor-pointer hover:shadow-lg hover:scale-[1.02] transition"
-                            onclick="handleClick(this)">
-                            <div class="flex flex-col gap-1 flex-[2_2_0px]">
-                                <p class="text-[#0e1b18] text-base font-bold leading-tight">
-                                    Tech Innovator Launches Advanced AI Assistant
-                                </p>
-                                <p class="text-[#4e9788] text-sm font-normal leading-normal">
-                                    The new AI assistant is set to revolutionize personal productivity and digital
-                                    interaction.
-                                </p>
-                            </div>
-                            <div class="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-xl flex-1"
-                                style='background-image: url("...")'>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
