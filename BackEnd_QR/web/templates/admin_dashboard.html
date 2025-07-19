@@ -85,24 +85,26 @@
                                 <tbody>
                                     {% for user in visiting_users %}
                                     <tr class="border-t border-t-[#d0e7e2]">
-                                        <td
-                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            {{ user.id }}</td>
-                                        <td
-                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ user.id }}
+                                        </td>
+                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             {{ user.name }}
                                         </td>
-                                        <td
-                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             {{ user.email }}
                                         </td>
-                                        <td
-                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             -
                                         </td>
-                                        <td
-                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            Delete
+                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            <form method="get" action="{% url 'editar_usuario_admin' user.id user.fuente %}" style="display:inline;">
+                                                <button type="submit" class="text-blue-600 hover:underline mr-2">Editar</button>
+                                            </form>
+                                            <form method="post" action="{% url 'eliminar_usuario' user.id user.fuente %}" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                            </form>
                                         </td>
                                     </tr>
                                     {% endfor %}

@@ -81,10 +81,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'QuakeRadar',
-        'USER': '',  # tu usuario
-        'PASSWORD': '',  # tu contraseña
+        'USER': 'sa',  # tu usuario
+        'PASSWORD': 'Oscar2006_',  # tu contraseña
         'HOST': 'localhost',
-        'PORT': '',  # 1433 por defecto
+        'PORT': '1433',  # 1433 por defecto
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'trusted_connection': 'yes',

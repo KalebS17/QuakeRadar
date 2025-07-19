@@ -12,6 +12,7 @@ from django.http import HttpResponse
 import random
 from dotenv import load_dotenv
 import os
+from .models import Noticia
 
 def index(request):
     return render(request, 'index.html')
@@ -76,6 +77,28 @@ def login_exitoso(request):
 def user_edit(request):
     return render(request, 'UserEdit.html')
 
+
+@login_required
+def editar_usuario(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('name')
+        fecha_nacimiento = request.POST.get('birth')
+        contrasena = request.POST.get('password')
+        user_id = request.user.id  
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    EXEC actualizar_usuario @Id=%s, @Nombre=%s, @Contrasena=%s, @FechaNacimiento=%s
+                """, [user_id, nombre, contrasena, fecha_nacimiento])
+        except Exception as e:
+            messages.error(request, f"Error al actualizar perfil: {e}")
+            return redirect('user_edit')
+
+        messages.success(request, "Perfil actualizado correctamente.")
+        return redirect('user_edit')
+    else:
+        return render(request, 'UserEdit.html')
 #Llamar al store procedure para registrar un usuario
 def register(request):
     if request.method == 'POST':
@@ -115,6 +138,56 @@ def register(request):
     return render(request, 'register.html')
 
 def mapa(request):
+    # Actualizar la base de datos de terremotos cada vez que se accede al mapa
+    tz_costa_rica = timezone(timedelta(hours=-6))
+    costarica_now = datetime.now(tz_costa_rica)
+    now_utc = costarica_now.astimezone(timezone.utc)
+
+    endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
+    starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+
+    params = {
+        "format": "geojson",
+        "starttime": starttime,
+        "endtime": endtime,
+    }
+
+    url = "https://earthquake.usgs.gov/fdsnws/event/1/query"
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        earthquakes = [
+            {
+                "id": feature["id"],
+                "mag": feature["properties"]["mag"],
+                "place": feature["properties"]["place"],
+                "type": feature["properties"]["type"],
+                "time": feature["properties"]["time"],
+                "coordinates": feature["geometry"]["coordinates"],
+            }
+            for feature in data["features"]
+        ]
+        with connection.cursor() as cursor:
+            for eq in earthquakes:
+                try:
+                    lat = eq["coordinates"][1]
+                    lon = eq["coordinates"][0]
+                    depth = eq["coordinates"][2]
+                    mag = eq["mag"]
+                    time = datetime.utcfromtimestamp(eq["time"] / 1000)
+                    cursor.execute("""
+                        SELECT COUNT(*) FROM dbo.Terremoto
+                        WHERE latitud = %s AND longitud = %s AND fecha_hora = %s
+                    """, [lat, lon, time])
+                    exists = cursor.fetchone()[0]
+                    if exists == 0:
+                        cursor.execute("""
+                            INSERT INTO dbo.Terremoto (latitud, longitud, magnitud, profundidad, fecha_hora)
+                            VALUES (%s, %s, %s, %s, %s)
+                        """, [lat, lon, mag, depth, time])
+                except Exception as e:
+                    print(f"Error al guardar terremoto en mapa: {e}")
     return render(request, 'Mapa.html')
 
 
@@ -162,23 +235,24 @@ def fetch_earthquake_data(request):
 @login_required
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def admin_dashboard(request):
-    # Usuarios de la tabla Usuarios
     with connection.cursor() as cursor:
         cursor.execute("SELECT Id, Nombre, Correo FROM Usuarios")
         usuarios = [
-            {"id": row[0], "name": row[1], "email": row[2]}
+            {"id": row[0], "name": row[1], "email": row[2], "fuente": "Usuarios"}
             for row in cursor.fetchall()
         ]
 
-    # Usuarios de auth_user
     auth_users = User.objects.all().values("id", "first_name", "email")
     auth_users_list = [
-        {"id": u["id"], "name": u["first_name"], "email": u["email"]}
+        {"id": u["id"], "name": u["first_name"], "email": u["email"], "fuente": "auth_user"}
         for u in auth_users
     ]
 
-    # Unir ambas listas
-    all_users = usuarios + auth_users_list
+    usuarios_dict = {u["email"]: u for u in usuarios}
+    for u in auth_users_list:
+        if u["email"] and u["email"] not in usuarios_dict:
+            usuarios_dict[u["email"]] = u
+    all_users = list(usuarios_dict.values())
 
     return render(request, 'admin_dashboard.html', {"visiting_users": all_users})
 
@@ -222,7 +296,10 @@ def save_earthquake_data(request):
     with connection.cursor() as cursor:
         for eq in earthquakes:
             try:
-                lon, lat, depth = eq["coordinates"]
+                # USGS: [longitud, latitud, profundidad]
+                lat = eq["coordinates"][1]
+                lon = eq["coordinates"][0]
+                depth = eq["coordinates"][2]
                 mag = eq["mag"]
                 time = datetime.utcfromtimestamp(eq["time"] / 1000)
                 cursor.execute("""
@@ -346,5 +423,97 @@ def news_generator(request):
     terremotos = get_random_earthquakes_db()
     if not terremotos:
         return render(request, "news.html", {"noticias": [], "mensaje": "No hay terremotos en la base de datos."})
-    noticias = [generar_noticia(t) for t in terremotos]
+    noticias = []
+    for t in terremotos:
+        noticia_data = generar_noticia(t)
+        # Convertir fecha_publicacion a datetime si es string
+        fecha_pub = noticia_data["fecha_publicacion"]
+        if isinstance(fecha_pub, str):
+            try:
+                fecha_pub_dt = datetime.strptime(fecha_pub, "%Y-%m-%d %H:%M")
+            except Exception:
+                fecha_pub_dt = datetime.now()
+        else:
+            fecha_pub_dt = fecha_pub
+        noticia_obj, created = Noticia.objects.get_or_create(
+            titulo=noticia_data["titulo"],
+            autor=noticia_data["autor"],
+            cuerpo=noticia_data["cuerpo"],
+            fecha_publicacion=fecha_pub_dt
+        )
+        noticias.append(noticia_data)
     return render(request, "news.html", {"noticias": noticias})
+
+from django.views.decorators.http import require_POST
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def eliminar_usuario(request, user_id, fuente):
+    if fuente == 'Usuarios':
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("EXEC eliminar_usuario @Id=%s", [user_id])
+            messages.success(request, "Usuario eliminado correctamente.")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar usuario: {e}")
+    elif fuente == 'auth_user':
+        try:
+            User.objects.filter(id=user_id).delete()
+            messages.success(request, "Usuario eliminado correctamente.")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar usuario: {e}")
+    return redirect('admin_dashboard')
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def editar_usuario_admin(request, user_id, fuente):
+    if fuente == 'Usuarios':
+        if request.method == 'POST':
+            nombre = request.POST.get('name')
+            fecha_nacimiento = request.POST.get('birth')
+            contrasena = request.POST.get('password')
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute("EXEC actualizar_usuario @Id=%s, @Nombre=%s, @Contrasena=%s, @FechaNacimiento=%s", [user_id, nombre, contrasena, fecha_nacimiento])
+                messages.success(request, "Usuario actualizado correctamente.")
+                return redirect('admin_dashboard')
+            except Exception as e:
+                messages.error(request, f"Error al actualizar usuario: {e}")
+        else:
+            # Obtener datos actuales
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT Nombre, FechaNacimiento FROM Usuarios WHERE Id=%s", [user_id])
+                row = cursor.fetchone()
+            return render(request, 'admin_edit_user.html', {
+                'user_id': user_id,
+                'fuente': fuente,
+                'nombre': row[0] if row else '',
+                'fecha_nacimiento': row[1].strftime('%Y-%m-%d') if row and row[1] else '',
+            })
+    elif fuente == 'auth_user':
+        if request.method == 'POST':
+            nombre = request.POST.get('name')
+            fecha_nacimiento = request.POST.get('birth')
+            contrasena = request.POST.get('password')
+            try:
+                user = User.objects.get(id=user_id)
+                user.first_name = nombre
+                user.set_password(contrasena)
+                user.save()
+                # Guardar fecha de nacimiento en un campo extra si lo tienes (ejemplo: user.profile.birthdate)
+                # Si tienes un modelo Profile relacionado, descomenta y ajusta:
+                # user.profile.birthdate = fecha_nacimiento
+                # user.profile.save()
+                messages.success(request, "Usuario actualizado correctamente.")
+                return redirect('admin_dashboard')
+            except Exception as e:
+                messages.error(request, f"Error al actualizar usuario: {e}")
+        else:
+            user = User.objects.get(id=user_id)
+            # Si tienes un campo extra para fecha de nacimiento, pásalo aquí
+            return render(request, 'admin_edit_user.html', {
+                'user_id': user_id,
+                'fuente': fuente,
+                'nombre': user.first_name,
+                'fecha_nacimiento': '',  # Ajusta si tienes el campo
+            })
