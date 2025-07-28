@@ -1,5 +1,6 @@
 import re
 from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
 from django.db import connection
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -233,8 +234,10 @@ def fetch_earthquake_data(request):
         return JsonResponse({"error": f"Error al consultar la API: {response.status_code}"}, status=500)
 
 @login_required
-@user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def admin_dashboard(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        messages.error(request, "Debes ser administrador para acceder al dashboard.")
+        return redirect('login')
     with connection.cursor() as cursor:
         cursor.execute("SELECT Id, Nombre, Correo FROM Usuarios")
         usuarios = [
@@ -254,7 +257,8 @@ def admin_dashboard(request):
             usuarios_dict[u["email"]] = u
     all_users = list(usuarios_dict.values())
 
-    return render(request, 'admin_dashboard.html', {"visiting_users": all_users})
+    noticias = Noticia.objects.all().order_by('-fecha_publicacion')
+    return render(request, 'admin_dashboard.html', {"visiting_users": all_users, "noticias": noticias})
 
 
 #Funcion para Guardar Terremotos en la DB
@@ -420,6 +424,35 @@ def procesar_noticia(noticia_texto):
     return {"titulo": titulo, "autor": autor, "cuerpo": cuerpo}
 
 def news_generator(request):
+    pass  # (bloque vacío para evitar error de indentación)
+# --- Vistas para editar y eliminar noticias ---
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def admin_edit_news(request, noticia_id):
+    noticia = get_object_or_404(Noticia, id=noticia_id)
+    if request.method == 'POST':
+        noticia.titulo = request.POST.get('titulo')
+        noticia.autor = request.POST.get('autor')
+        noticia.cuerpo = request.POST.get('cuerpo')
+        fecha_str = request.POST.get('fecha_publicacion')
+        try:
+            noticia.fecha_publicacion = datetime.strptime(fecha_str, '%Y-%m-%dT%H:%M')
+        except Exception:
+            pass
+        noticia.save()
+        messages.success(request, 'Noticia actualizada correctamente.')
+        return redirect('admin_dashboard')
+    return render(request, 'admin_edit_news.html', {'noticia': noticia})
+
+@login_required
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
+def admin_delete_news(request, noticia_id):
+    noticia = get_object_or_404(Noticia, id=noticia_id)
+    if request.method == 'POST':
+        noticia.delete()
+        messages.success(request, 'Noticia eliminada correctamente.')
+        return redirect('admin_dashboard')
+    return render(request, 'admin_dashboard.html')
     terremotos = get_random_earthquakes_db()
     if not terremotos:
         return render(request, "news.html", {"noticias": [], "mensaje": "No hay terremotos en la base de datos."})

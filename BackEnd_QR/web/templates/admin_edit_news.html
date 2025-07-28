@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Noticia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'Estilos/admin_edit_user.css' %}">
+</head>
+<body>
+    <div class="edit-user-container">
+        <h2 class="edit-user-title">Editar Noticia</h2>
+        <form method="post" class="edit-user-form">
+            {% csrf_token %}
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" name="titulo" value="{{ noticia.titulo }}" required>
+
+            <label for="autor">Autor</label>
+            <input type="text" id="autor" name="autor" value="{{ noticia.autor }}" required>
+
+            <label for="cuerpo">Contenido</label>
+            <textarea id="cuerpo" name="cuerpo" required>{{ noticia.cuerpo }}</textarea>
+
+            <label for="fecha_publicacion">Fecha de publicación</label>
+            <input type="datetime-local" id="fecha_publicacion" name="fecha_publicacion" value="{{ noticia.fecha_publicacion|date:'Y-m-d\\TH:i' }}" required>
+
+            <div class="edit-user-actions">
+                <a href="{% url 'admin_dashboard' %}" class="edit-user-cancel">Cancelar</a>
+                <button type="submit" class="edit-user-save">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

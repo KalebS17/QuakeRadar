@@ -16,5 +16,7 @@ urlpatterns = [
     path('news-generator/', views.news_generator, name='news_generator'),
     path('user/editar/', views.editar_usuario, name='editar_usuario'),
     path('dashboard/admin/eliminar_usuario/<int:user_id>/<str:fuente>/', views.eliminar_usuario, name='eliminar_usuario'),
-    path('dashboard/admin/editar_usuario/<int:user_id>/<str:fuente>/', views.editar_usuario_admin, name='editar_usuario_admin')
+    path('dashboard/admin/editar_usuario/<int:user_id>/<str:fuente>/', views.editar_usuario_admin, name='editar_usuario_admin'),
+    path('dashboard/admin/editar_noticia/<int:noticia_id>/', views.admin_edit_news, name='admin_edit_news'),
+    path('dashboard/admin/eliminar_noticia/<int:noticia_id>/', views.admin_delete_news, name='admin_delete_news')
 ]

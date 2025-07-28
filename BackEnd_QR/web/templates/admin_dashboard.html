@@ -1,5 +1,4 @@
 <html>
-
 <head>
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
@@ -146,114 +145,39 @@
                     <h2 class="text-[#0e1b18] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
                         News Management</h2>
                     <div class="flex px-4 py-3 justify-start">
-                        <button
-                            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#095544] text-[#f8fcfb] text-sm font-bold leading-normal tracking-[0.015em]">
-                            <span class="truncate">Add News</span>
-                        </button>
+                        <!-- Aquí podrías agregar un botón para crear noticias si lo deseas -->
                     </div>
                     <div class="px-4 py-3 @container">
                         <div class="flex overflow-hidden rounded-lg border border-[#d0e7e2] bg-[#f8fcfb]">
                             <table class="flex-1">
                                 <thead>
                                     <tr class="bg-[#f8fcfb]">
-                                        <th
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
-                                            Title</th>
-                                        <th
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
-                                            Content</th>
-                                        <th
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
-                                            Date</th>
-                                        <th
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">
-                                            Actions
-                                        </th>
+                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Título</th>
+                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Autor</th>
+                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Fecha</th>
+                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for noticia in noticias %}
                                     <tr class="border-t border-t-[#d0e7e2]">
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
-                                            New Product Launch
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            We are excited to announce the launch of our new product line.
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            2024-01-21
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            Edit | Delete
+                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">{{ noticia.titulo }}</td>
+                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">{{ noticia.autor }}</td>
+                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">{{ noticia.fecha_publicacion|date:'Y-m-d H:i' }}</td>
+                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            <a href="{% url 'admin_edit_news' noticia.id %}" class="text-blue-600 hover:underline mr-2">Editar</a>
+                                            <form method="post" action="{% url 'admin_delete_news' noticia.id %}" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar esta noticia?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                            </form>
                                         </td>
                                     </tr>
-                                    <tr class="border-t border-t-[#d0e7e2]">
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
-                                            Company Update
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            An update on recent company developments and future plans.
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            2024-01-15
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            Edit | Delete
-                                        </td>
-                                    </tr>
-                                    <tr class="border-t border-t-[#d0e7e2]">
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
-                                            Holiday Schedule
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            Important information regarding our holiday schedule.
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
-                                            2023-12-20
-                                        </td>
-                                        <td
-                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            Edit | Delete
-                                        </td>
-                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center">No hay noticias registradas.</td></tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-                        <style>
-                            @container(max-width:120px) {
-                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 {
-                                    display: none;
-                                }
-                            }
-
-                            @container(max-width:240px) {
-                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 {
-                                    display: none;
-                                }
-                            }
-
-                            @container(max-width:360px) {
-                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 {
-                                    display: none;
-                                }
-                            }
-
-                            @container(max-width:480px) {
-                                .table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 {
-                                    display: none;
-                                }
-                            }
-                        </style>
                     </div>
                 </div>
             </div>
