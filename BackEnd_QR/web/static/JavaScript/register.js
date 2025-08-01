@@ -21,6 +21,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return /^\d+$/.test(str);
     }
 
+    confirmPasswordInput.addEventListener("input", () => {
+    confirmPasswordInput.setCustomValidity("");
+    confirmPasswordInput.classList.remove("error");
+    });
+
+    passwordInput.addEventListener("input", () => {
+    confirmPasswordInput.setCustomValidity("");
+    confirmPasswordInput.classList.remove("error");
+    });
+    
     form.addEventListener("submit", (event) => {
         let isValid = true;
 

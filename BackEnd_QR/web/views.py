@@ -108,8 +108,20 @@ def register(request):
         email = request.POST.get('email', '').strip()
         phone = request.POST.get('phone', '').strip()
         password = request.POST.get('password', '').strip()
+        password_confirm = request.POST.get('confirm-password', '').strip()
         birthdate = request.POST.get('birthdate', '').strip()
 
+        print(f"POST name={name}, surnames={surnames}, email={email}, phone={phone}, password={password}, password_confirm={password_confirm}, birthdate={birthdate}")
+
+        # Validación de contraseñas
+        if password != password_confirm:
+            print("Contraseñas no coinciden")
+            messages.error(request, "Las contraseñas no coinciden.")
+            return render(request, 'register.html', {
+                'name': name, 'surname': surnames, 'email': email, 'phone': phone, 'birthdate': birthdate
+            })
+
+        
         # Validación de solo letras y espacios
         if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', name):
             messages.error(request, "El nombre solo puede contener letras y espacios.")
