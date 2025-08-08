@@ -436,7 +436,29 @@ def procesar_noticia(noticia_texto):
     return {"titulo": titulo, "autor": autor, "cuerpo": cuerpo}
 
 def news_generator(request):
-    pass  # (bloque vacío para evitar error de indentación)
+    terremotos = get_random_earthquakes_db()
+    if not terremotos:
+        return render(request, "news.html", {"noticias": [], "mensaje": "No hay terremotos en la base de datos."})
+    noticias = []
+    for t in terremotos:
+        noticia_data = generar_noticia(t)
+        # Convertir fecha_publicacion a datetime si es string
+        fecha_pub = noticia_data["fecha_publicacion"]
+        if isinstance(fecha_pub, str):
+            try:
+                fecha_pub_dt = datetime.strptime(fecha_pub, "%Y-%m-%d %H:%M")
+            except Exception:
+                fecha_pub_dt = datetime.now()
+        else:
+            fecha_pub_dt = fecha_pub
+        noticia_obj, created = Noticia.objects.get_or_create(
+            titulo=noticia_data["titulo"],
+            autor=noticia_data["autor"],
+            cuerpo=noticia_data["cuerpo"],
+            fecha_publicacion=fecha_pub_dt
+        )
+        noticias.append(noticia_data)
+    return render(request, "news.html", {"noticias": noticias})
 # --- Vistas para editar y eliminar noticias ---
 @login_required
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)

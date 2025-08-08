@@ -45,7 +45,7 @@
                         </div>
                     </button>
                     <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBA3OlBE8Ayk4Ax13OrhNc4ARCSZsoWmWJuUzfgcr_nEKVCPxjvo2Lk4F61BMTrUJcemQU1JHwPPyBUt9DNuo9jHaRowGhZ6_IsEQO0t2zsy1eTIITxxfzjsKae2JUk1rZ8ES6rEe__x6Y8AGqfycWQA1Y8GRWq5J1ZvnV-ABN6Oc91P4uiPivETuC4-f5ESPPE5DaQvbv5HfigGQw4xpyKv73MHz5pYHzF7ebf0y1SnKxhLJLdSbbhQK-IuVI3ZKinjhjq4DZZSrDz");'>
+                        style='background-image: url("{{ request.user.profile.foto.url|default:'/static/images/default_avatar.png' }}");'>
                     </div>
                 </div>
             </header>

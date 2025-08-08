@@ -36,7 +36,7 @@
                         <span class="truncate">Create New</span>
                     </button>
                     <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                        style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBcJ_NU_OC9ZU_DodWlyQPkbv3GwmIeY-PIvAPP9jxLNXrGe67or_ZBhq8BfVp6aZnl_2A3Og2qtT8n63hM4QtjliI1p0HGrIdU6p0C1PEzT5D9C7iX2cmVBt15UtPng7yAiuNgBv0ODzTpAy2nQcOMKyOwpKmdtC_Z9Y3EkuQPxfmB-PWemVLRtYZiwXe9_G1cdRp44hUAJkeH8z63TfPeRl8jktCgqIGJ9fCW18gWaLQVp4UAcj3uYdzVmJKrKGs0VBx8m-StcWe7");'>
+                        style='background-image: url("{{ request.user.profile.foto.url|default:'/static/images/default_avatar.png' }}");'>
                     </div>
                 </div>
             </header>
