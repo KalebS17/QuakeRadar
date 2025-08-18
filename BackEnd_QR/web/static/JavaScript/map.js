@@ -37,7 +37,7 @@ map.on('locationerror', function () {
 });
 
 // Búsqueda con Nominatim
-document.getElementById('search-form').addEventListener('submit', function(e) {
+document.getElementById('search-form').addEventListener('submit', function (e) {
   e.preventDefault();
   const query = document.getElementById('search-input').value;
   if (!query) return;
@@ -63,6 +63,7 @@ async function fetchEarthquakeData() {
   return data.earthquakes;
 }
 
+let __didInitialFit = false;
 // Agregar marcadores al mapa
 function addEarthquakeMarkers(earthquakes) {
   earthquakeMarkers.clearLayers();
@@ -84,7 +85,10 @@ function addEarthquakeMarkers(earthquakes) {
   });
 
   if (bounds.length > 0) {
-    map.fitBounds(bounds);
+    if (!__didInitialFit && bounds && L.latLngBounds(bounds).isValid()) {
+      map.fitBounds(L.latLngBounds(bounds), { padding: [40, 40] });
+      __didInitialFit = true;
+    }
   }
 }
 
@@ -123,7 +127,7 @@ document.getElementById('filter-form').addEventListener('submit', async (e) => {
   if (!isNaN(magnitude)) filtered = filtered.filter(eq => eq.mag >= magnitude);
   if (location) filtered = filtered.filter(eq => eq.place.toLowerCase().includes(location));
 
-  filtered.sort((a,b) => b.mag - a.mag);
+  filtered.sort((a, b) => b.mag - a.mag);
 
   earthquakeMarkers.clearLayers();
   addEarthquakeMarkers(filtered);
@@ -136,3 +140,64 @@ document.getElementById('filter-form').addEventListener('submit', async (e) => {
   const earthquakes = await fetchEarthquakeData();
   addEarthquakeMarkers(earthquakes);
 })();
+
+//Intervalo de refresco del mapa
+const LIVE_UPDATE_INTERVAL_MS = 10000; // 10s (ajustable)
+
+let _liveTimer = null;
+
+//Funcion para refrescar los terremotos 
+async function _refreshEarthquakesApplyingActiveFilters() {
+
+  const earthquakes = await fetchEarthquakeData();
+
+  // Reusar los filtros actuales si el usuario los tiene activos
+  const dateInput = document.getElementById('filter-date');
+  const magInput = document.getElementById('filter-magnitude');
+  const locInput = document.getElementById('filter-location');
+  const date = dateInput ? dateInput.value : '';
+  const magnitude = magInput && magInput.value !== '' ? parseFloat(magInput.value) : NaN;
+  const location = locInput ? locInput.value.trim().toLowerCase() : '';
+
+  let filtered = earthquakes;
+  if (date) filtered = filtered.filter(eq => new Date(eq.time) >= new Date(date));
+  if (!isNaN(magnitude)) filtered = filtered.filter(eq => eq.mag >= magnitude);
+  if (location) filtered = filtered.filter(eq => (eq.place || '').toLowerCase().includes(location));
+  filtered.sort((a, b) => b.mag - a.mag);
+
+  addEarthquakeMarkers(filtered);
+}
+
+//Funcion para arrancar actualizaciones en tiempo real
+function startLiveUpdates() {
+  if (_liveTimer !== null) return; 
+  _liveTimer = setInterval(async () => {
+    try {
+      await _refreshEarthquakesApplyingActiveFilters();
+    } catch (err) {
+      console.error('Fallo al actualizar terremotos en tiempo real:', err);
+    }
+  }, LIVE_UPDATE_INTERVAL_MS);
+}
+
+//Funcion para detener actualizaciones en tiempo real
+function stopLiveUpdates() {
+  if (_liveTimer !== null) {
+    clearInterval(_liveTimer);
+    _liveTimer = null;
+  }
+}
+
+// Pausar cuando la pestaña está oculta para ahorrar recursos
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopLiveUpdates();
+  } else {
+    startLiveUpdates();
+    // actualización inmediata al volver
+    _refreshEarthquakesApplyingActiveFilters().catch(console.error);
+  }
+});
+
+// Arrancar inmediatamente
+startLiveUpdates();

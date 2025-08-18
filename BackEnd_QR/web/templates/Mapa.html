@@ -102,7 +102,7 @@
           </div>
 
           <!-- Botón Para Volver al Inicio -->
-          <div id="menu-container" style="position: fixed; top: 24px; left: 24px; z-index: 1101;">
+          <div id="home-container" style="position: fixed; top: 24px; left: 24px; z-index: 1101;">
             <a href="{% url 'index' %}"
               style="background: #095544; border-radius: 8px; width: 48px; height: 48px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#fff" class="bi bi-house"
@@ -124,25 +124,6 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="{% static 'JavaScript/map.js' %}"></script>
-  <script>
-    const menuToggle = document.getElementById('menu-toggle');
-    const filterPopup = document.getElementById('filter-popup');
-
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (filterPopup.style.display === 'block') {
-        filterPopup.style.display = 'none';
-      } else {
-        filterPopup.style.display = 'block';
-      }
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!filterPopup.contains(e.target) && !menuToggle.contains(e.target)) {
-        filterPopup.style.display = 'none';
-      }
-    });
-  </script>
 </body>
 
 </html>
