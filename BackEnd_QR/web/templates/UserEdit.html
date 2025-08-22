@@ -227,7 +227,12 @@
         </div>
         <button type="submit">Guardar cambios</button>
       </form>
-    </main>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message|escape }}</div>
+      {% endfor %}
+    {% endif %}
+  </main>
   </div>
   <script>
     document.getElementById('uploadPhoto').addEventListener('change', function (e) {

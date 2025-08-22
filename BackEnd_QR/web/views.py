@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import pytz
 import requests
 from django.http import JsonResponse
 from django.http import HttpResponse
@@ -28,14 +29,18 @@ def login(request):
     if request.method == 'POST':
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '').strip()
-
-        # 1. Busca en Usuarios
+        # Validación básica de email y password
+        if not email or not password:
+            messages.error(request, "Debe ingresar correo y contraseña.")
+            response = render(request, 'logIn.html')
+            response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = '0'
+            return response
+        # 1. Busca en Usuarios (proteger contra SQLi)
         with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT Id, Nombre FROM Usuarios WHERE Correo = %s AND Contraseña = %s
-            """, [email, password])
+            cursor.execute("SELECT Id, Nombre FROM Usuarios WHERE Correo = %s AND Contraseña = %s", [email, password])
             row = cursor.fetchone()
-
         if row:
             user, created = User.objects.get_or_create(
                 username=email,
@@ -44,16 +49,11 @@ def login(request):
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth_login(request, user)
             return redirect('login_exitoso')
-
         # 2. Si no está en Usuarios, busca en admin
         with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT Id, Nombre FROM admin WHERE Correo = %s AND Contraseña = %s
-            """, [email, password])
+            cursor.execute("SELECT Id, Nombre FROM admin WHERE Correo = %s AND Contraseña = %s", [email, password])
             admin_row = cursor.fetchone()
-
         if admin_row:
-            # Puedes usar un username especial para distinguir admins
             admin_username = f"admin_{email}"
             user, created = User.objects.get_or_create(
                 username=admin_username,
@@ -64,11 +64,18 @@ def login(request):
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             auth_login(request, user)
-            return redirect('admin_dashboard')  # O la página que quieras para admins
-
-        # Si no está en ninguna tabla
+            return redirect('admin_dashboard')
         messages.error(request, "Correo o contraseña incorrectos.")
-    return render(request, 'logIn.html')
+        response = render(request, 'logIn.html')
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+    response = render(request, 'logIn.html')
+    response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 def login_exitoso(request):
@@ -111,17 +118,26 @@ def register(request):
         password_confirm = request.POST.get('confirm-password', '').strip()
         birthdate = request.POST.get('birthdate', '').strip()
 
-        print(f"POST name={name}, surnames={surnames}, email={email}, phone={phone}, password={password}, password_confirm={password_confirm}, birthdate={birthdate}")
-
+        # Validación de campos obligatorios
+        if not all([name, surnames, email, phone, password, password_confirm, birthdate]):
+            messages.error(request, "Todos los campos son obligatorios.")
+            return render(request, 'register.html', {
+                'name': name, 'surname': surnames, 'email': email, 'phone': phone, 'birthdate': birthdate
+            })
+        # Validación de email
+        if not re.match(r'^\S+@\S+\.\S+$', email):
+            messages.error(request, "Correo electrónico inválido.")
+            return render(request, 'register.html')
         # Validación de contraseñas
         if password != password_confirm:
-            print("Contraseñas no coinciden")
             messages.error(request, "Las contraseñas no coinciden.")
             return render(request, 'register.html', {
                 'name': name, 'surname': surnames, 'email': email, 'phone': phone, 'birthdate': birthdate
             })
-
-        
+        # Validación de fortaleza de contraseña
+        if len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'[a-z]', password) or not re.search(r'\d', password):
+            messages.error(request, "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.")
+            return render(request, 'register.html')
         # Validación de solo letras y espacios
         if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$', name):
             messages.error(request, "El nombre solo puede contener letras y espacios.")
@@ -133,7 +149,6 @@ def register(request):
         if not re.match(r'^\d+$', phone):
             messages.error(request, "El teléfono solo puede contener números.")
             return render(request, 'register.html')
-
         try:
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -146,15 +161,14 @@ def register(request):
                 messages.error(request, "El correo o teléfono ya están registrados.")
             else:
                 messages.error(request, f"Error al registrar usuario: {e}")
-
-    # Para GET (cuando solo visitas la página)
     return render(request, 'register.html')
 
 def mapa(request):
     # Actualizar la base de datos de terremotos cada vez que se accede al mapa
-    tz_costa_rica = timezone(timedelta(hours=-6))
+    import pytz
+    tz_costa_rica = pytz.timezone('America/Costa_Rica')
     costarica_now = datetime.now(tz_costa_rica)
-    now_utc = costarica_now.astimezone(timezone.utc)
+    now_utc = costarica_now.astimezone(pytz.utc)
 
     endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
     starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
@@ -208,15 +222,35 @@ def mapa(request):
 #funcion para obtener los datos de la API de terremotos
 def fetch_earthquake_data(request):
     # Zona horaria de Costa Rica (UTC-6)
-    tz_costa_rica = timezone(timedelta(hours=-6))
+    import pytz
+    tz_costa_rica = pytz.timezone('America/Costa_Rica')
 
-    # Hora actual en Costa Rica
-    costarica_now = datetime.now(tz_costa_rica)
-    now_utc = costarica_now.astimezone(timezone.utc)
+    # Leer parámetros de rango de fechas (formato yyyy-mm-dd)
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
 
-    # Formato ISO8601 para la API
-    endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
-    starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+    if not date_from or not date_to:
+        # Vista por defecto: últimos 24h
+        costarica_now = datetime.now(tz_costa_rica)
+        now_utc = costarica_now.astimezone(pytz.utc)
+        endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
+        starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
+    else:
+        # Validar formato y rango máximo de 15 días
+        try:
+            from_dt = datetime.strptime(date_from, '%Y-%m-%d')
+            to_dt = datetime.strptime(date_to, '%Y-%m-%d')
+        except Exception:
+            return JsonResponse({"error": "Formato de fecha inválido. Use yyyy-mm-dd."}, status=400)
+        if from_dt > to_dt:
+            return JsonResponse({"error": "La fecha 'desde' no puede ser mayor que la fecha 'hasta'."}, status=400)
+        if (to_dt - from_dt).days > 15:
+            return JsonResponse({"error": "El rango máximo permitido es de 15 días."}, status=400)
+        # Convertir a UTC solo si todo es válido
+        from_dt = tz_costa_rica.localize(from_dt).astimezone(pytz.utc)
+        to_dt = tz_costa_rica.localize(to_dt + timedelta(days=1) - timedelta(seconds=1)).astimezone(pytz.utc)
+        starttime = from_dt.isoformat(timespec='seconds').replace('+00:00', 'Z')
+        endtime = to_dt.isoformat(timespec='seconds').replace('+00:00', 'Z')
 
     params = {
         "format": "geojson",
@@ -225,23 +259,27 @@ def fetch_earthquake_data(request):
     }
 
     url = "https://earthquake.usgs.gov/fdsnws/event/1/query"
-    response = requests.get(url, params=params)
-
+    try:
+        response = requests.get(url, params=params, timeout=10)
+    except Exception as e:
+        return JsonResponse({"error": f"Error de conexión a la API: {str(e)}"}, status=500)
     if response.status_code == 200:
-        data = response.json()
-        # Extraer los datos relevantes para el mapa
-        earthquakes = [
-            {
-                "id": feature["id"],
-                "mag": feature["properties"]["mag"],
-                "place": feature["properties"]["place"],
-                "type": feature["properties"]["type"],
-                "time": feature["properties"]["time"],
-                "coordinates": feature["geometry"]["coordinates"],
-            }
-            for feature in data["features"] #usamos list comprehension
-        ]
-        return JsonResponse({"earthquakes": earthquakes})
+        try:
+            data = response.json()
+            earthquakes = [
+                {
+                    "id": feature["id"],
+                    "mag": feature["properties"]["mag"],
+                    "place": feature["properties"]["place"],
+                    "type": feature["properties"]["type"],
+                    "time": feature["properties"]["time"],
+                    "coordinates": feature["geometry"]["coordinates"],
+                }
+                for feature in data.get("features", [])
+            ]
+            return JsonResponse({"earthquakes": earthquakes})
+        except Exception as e:
+            return JsonResponse({"error": f"Error procesando datos de la API: {str(e)}"}, status=500)
     else:
         return JsonResponse({"error": f"Error al consultar la API: {response.status_code}"}, status=500)
 
@@ -276,9 +314,10 @@ def admin_dashboard(request):
 #Funcion para Guardar Terremotos en la DB
 def save_earthquake_data(request):
     # Zona horaria de Costa Rica
-    tz_costa_rica = timezone(timedelta(hours=-6))
+    import pytz
+    tz_costa_rica = pytz.timezone('America/Costa_Rica')
     costarica_now = datetime.now(tz_costa_rica)
-    now_utc = costarica_now.astimezone(timezone.utc)
+    now_utc = costarica_now.astimezone(pytz.utc)
 
     endtime = now_utc.isoformat(timespec='seconds').replace('+00:00', 'Z')
     starttime = (now_utc - timedelta(days=1)).isoformat(timespec='seconds').replace('+00:00', 'Z')
@@ -369,17 +408,51 @@ def generar_noticia(terremoto):
     ]
     autor = random.choice(autores)
     # Generar fecha de publicación aleatoria (entre 1 minuto y 48 horas después del incidente)
+    from django.utils import timezone
+    import pytz
     fecha_incidente = terremoto['fecha_hora']
     if isinstance(fecha_incidente, str):
         try:
             fecha_incidente = datetime.fromisoformat(str(fecha_incidente))
         except Exception:
-            fecha_incidente = datetime.now()
+            fecha_incidente = timezone.now()
+    if timezone.is_naive(fecha_incidente):
+        fecha_incidente = fecha_incidente.replace(tzinfo=pytz.UTC)
     min_offset = timedelta(minutes=1)
     max_offset = timedelta(hours=48)
     offset = min_offset + (max_offset - min_offset) * random.random()
     fecha_publicacion = fecha_incidente + offset
+    if timezone.is_naive(fecha_publicacion):
+        fecha_publicacion = fecha_publicacion.replace(tzinfo=pytz.UTC)
     fecha_publicacion_str = fecha_publicacion.strftime('%Y-%m-%d %H:%M')
+    ubicacion_nombre = terremoto.get('ubicacion_nombre', None)
+    if not ubicacion_nombre:
+        # Geocodificación inversa simple usando Nominatim (OpenStreetMap)
+        try:
+            import requests
+            lat = terremoto.get('latitud')
+            lon = terremoto.get('longitud')
+            if lat is not None and lon is not None:
+                url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=10&addressdetails=1"
+                headers = {"User-Agent": "QuakeRadar/1.0 (contacto@quakeradar.com)"}
+                resp = requests.get(url, headers=headers, timeout=3)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    address = data.get('address', {})
+                    city = address.get('city') or address.get('town') or address.get('village') or address.get('state')
+                    country = address.get('country')
+                    if city and country:
+                        ubicacion_nombre = f"{city}, {country}"
+                    elif country:
+                        ubicacion_nombre = country
+                    else:
+                        ubicacion_nombre = "una ubicación específica"
+                else:
+                    ubicacion_nombre = "una ubicación específica"
+            else:
+                ubicacion_nombre = "una ubicación específica"
+        except Exception:
+            ubicacion_nombre = "una ubicación específica"
     if mag < 3.0:
         titulos = [
             f"Sismo leve registrado (Magnitud {mag})",
@@ -387,9 +460,9 @@ def generar_noticia(terremoto):
             f"Movimiento sísmico menor sin afectaciones (Mag. {mag})"
         ]
         cuerpos = [
-            f"Un sismo de baja magnitud ({mag}) fue detectado el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. No se reportan daños ni afectaciones.",
-            f"Se registró un temblor leve de magnitud {mag} el {terremoto['fecha_hora']}. El evento pasó desapercibido para la mayoría de la población.",
-            f"Un pequeño sismo ocurrió el {terremoto['fecha_hora']} con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Sin consecuencias para la comunidad. Magnitud reportada: {mag}."
+            f"Un sismo de baja magnitud ({mag}) fue detectado el {terremoto['fecha_hora']} en {ubicacion_nombre}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. No se reportan daños ni afectaciones.",
+            f"Se registró un temblor leve de magnitud {mag} el {terremoto['fecha_hora']} en {ubicacion_nombre}. El evento pasó desapercibido para la mayoría de la población.",
+            f"Un pequeño sismo ocurrió el {terremoto['fecha_hora']} en {ubicacion_nombre} con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Sin consecuencias para la comunidad. Magnitud reportada: {mag}."
         ]
     elif mag < 5.0:
         titulos = [
@@ -398,9 +471,9 @@ def generar_noticia(terremoto):
             f"Temblor causa inquietud en la comunidad (Mag. {mag})"
         ]
         cuerpos = [
-            f"Un terremoto de magnitud {mag} se registró el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se sintió en varias comunidades, pero no se reportan daños graves.",
-            f"El {terremoto['fecha_hora']} se produjo un sismo de magnitud {mag} que generó inquietud entre los habitantes locales.",
-            f"Un temblor moderado sacudió la zona el {terremoto['fecha_hora']}, sin consecuencias graves reportadas. Magnitud registrada: {mag}."
+            f"Un terremoto de magnitud {mag} se registró el {terremoto['fecha_hora']} en {ubicacion_nombre}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se sintió en varias comunidades, pero no se reportan daños graves.",
+            f"El {terremoto['fecha_hora']} se produjo un sismo de magnitud {mag} en {ubicacion_nombre} que generó inquietud entre los habitantes locales.",
+            f"Un temblor moderado sacudió la zona de {ubicacion_nombre} el {terremoto['fecha_hora']}, sin consecuencias graves reportadas. Magnitud registrada: {mag}."
         ]
     elif mag < 7.0:
         titulos = [
@@ -409,9 +482,9 @@ def generar_noticia(terremoto):
             f"Sismo de gran magnitud alerta a la población (Mag. {mag})"
         ]
         cuerpos = [
-            f"Un fuerte terremoto de magnitud {mag} sacudió la región el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Las autoridades recomiendan precaución ante posibles réplicas.",
-            f"El {terremoto['fecha_hora']} se registró un sismo de gran magnitud ({mag}) que generó alarma en la población.",
-            f"Un terremoto intenso fue percibido el {terremoto['fecha_hora']}, con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Magnitud: {mag}."
+            f"Un fuerte terremoto de magnitud {mag} sacudió la región de {ubicacion_nombre} el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Las autoridades recomiendan precaución ante posibles réplicas.",
+            f"El {terremoto['fecha_hora']} se registró un sismo de gran magnitud ({mag}) en {ubicacion_nombre} que generó alarma en la población.",
+            f"Un terremoto intenso fue percibido el {terremoto['fecha_hora']} en {ubicacion_nombre}, con epicentro en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}. Magnitud: {mag}."
         ]
     else:
         titulos = [
@@ -420,9 +493,9 @@ def generar_noticia(terremoto):
             f"Evento sísmico mayor afecta la región (Mag. {mag})"
         ]
         cuerpos = [
-            f"Un terremoto de gran magnitud ({mag}) ocurrió el {terremoto['fecha_hora']}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se reportan daños significativos y se recomienda seguir las indicaciones de las autoridades.",
-            f"El {terremoto['fecha_hora']} se produjo un sismo devastador de magnitud {mag}, con afectaciones en varias zonas.",
-            f"Un evento sísmico mayor sacudió la región el {terremoto['fecha_hora']}, generando preocupación y daños materiales. Magnitud: {mag}."
+            f"Un terremoto de gran magnitud ({mag}) ocurrió el {terremoto['fecha_hora']} en {ubicacion_nombre}. El epicentro estuvo en latitud {terremoto['latitud']}, longitud {terremoto['longitud']}, a {terremoto['profundidad']} km de profundidad. Se reportan daños significativos y se recomienda seguir las indicaciones de las autoridades.",
+            f"El {terremoto['fecha_hora']} se produjo un sismo devastador de magnitud {mag} en {ubicacion_nombre}, con afectaciones en varias zonas.",
+            f"Un evento sísmico mayor sacudió la región de {ubicacion_nombre} el {terremoto['fecha_hora']}, generando preocupación y daños materiales. Magnitud: {mag}."
         ]
     titulo = random.choice(titulos)
     cuerpo = random.choice(cuerpos)
@@ -440,17 +513,22 @@ def news_generator(request):
     if not terremotos:
         return render(request, "news.html", {"noticias": [], "mensaje": "No hay terremotos en la base de datos."})
     noticias = []
+    from django.utils import timezone
+    import pytz
     for t in terremotos:
         noticia_data = generar_noticia(t)
-        # Convertir fecha_publicacion a datetime si es string
-        fecha_pub = noticia_data["fecha_publicacion"]
-        if isinstance(fecha_pub, str):
-            try:
-                fecha_pub_dt = datetime.strptime(fecha_pub, "%Y-%m-%d %H:%M")
-            except Exception:
-                fecha_pub_dt = datetime.now()
+        # Asegurar que 'fecha_publicacion' exista
+        if "fecha_publicacion" not in noticia_data:
+            fecha_pub_dt = timezone.now()
+            noticia_data["fecha_publicacion"] = fecha_pub_dt.strftime("%Y-%m-%d %H:%M")
         else:
-            fecha_pub_dt = fecha_pub
+            # Convertir string a datetime aware
+            try:
+                fecha_pub_dt = datetime.strptime(noticia_data["fecha_publicacion"], "%Y-%m-%d %H:%M")
+                if timezone.is_naive(fecha_pub_dt):
+                    fecha_pub_dt = fecha_pub_dt.replace(tzinfo=pytz.UTC)
+            except Exception:
+                fecha_pub_dt = timezone.now()
         noticia_obj, created = Noticia.objects.get_or_create(
             titulo=noticia_data["titulo"],
             autor=noticia_data["autor"],

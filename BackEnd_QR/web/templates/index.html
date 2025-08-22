@@ -18,14 +18,16 @@
             </h1>
             <nav class="nav">
                 <ul>
-                    <li><a href="{% url 'register' %}">Registrarse</a></li>
-                    <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                    <li><a href="{% url 'news_generator' %}">News</a></li>
+                    {% if not request.user.is_authenticated %}
+                        <li><a href="{% url 'register' %}"><i class="fa fa-user-plus"></i> Registrarse</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'mapa' %}"><i class="fa fa-map"></i> Mapa</a></li>
+                    <li><a href="{% url 'news_generator' %}"><i class="fa fa-newspaper"></i> News</a></li>
                     <li>
                         {% if request.user.is_authenticated %}
-                            <a href="{% url 'user_edit' %}">{{ request.user.get_full_name|default:request.user.username }}</a>
+                            <a href="{% url 'user_edit' %}"><i class="fa fa-user"></i> {{ request.user.get_full_name|default:request.user.username }}</a>
                         {% else %}
-                            <a href="{% url 'login' %}">Iniciar Sesion</a>
+                            <a href="{% url 'login' %}"><i class="fa fa-sign-in-alt"></i> Iniciar Sesión</a>
                         {% endif %}
                     </li>
                 </ul>
@@ -37,8 +39,14 @@
         <section id="home" class="hero-section">
             <div class="container">
                 <h2>El Mejor Mapa en Tiempo Real</h2>
-                <p>Brindando informacion tectonica experta para todo Internet. Inicia Sesion Aqui!</p>
-                <a href="{% url 'login' %}" class="btn">Iniciar Sesion</a>
+                {% if user.is_authenticated %}
+                    <p>Bienvenido {{ user.get_full_name|default:user.username|default:user.email|default:" usuario" }}. Accede al mapa en tiempo real.</p>
+                    <a href="{% url 'mapa' %}" class="btn">Ir al Mapa</a>
+                {% else %}
+                    <p>Brindando información tectónica experta para todo Internet. Inicia sesión o regístrate para acceder al mapa.</p>
+                    <a href="{% url 'login' %}" class="btn">Iniciar Sesión</a>
+                    <a href="{% url 'register' %}" class="btn" style="margin-left: 10px; background: #095544;">Registrarse</a>
+                {% endif %}
             </div>
         </section>
 
@@ -69,25 +77,25 @@
                     <div class="audience-card">
                         <h4>Backend Python</h4>
                         <ul>
-                            <li>Desarrollo robusto con Flask/Django [el q elijamos jiji]</li>
-                            <li>manejo eficiente de APIs sísmicas</li>
-                            <li>procesamiento de datos en tiempo real</li>
+                            <li>Desarrollo robusto con Django</li>
+                            <li>Manejo eficiente de APIs sísmicas</li>
+                            <li>Procesamiento de datos en tiempo real</li>
                         </ul>
                     </div>
                     <div class="audience-card">
                         <h4>Mapas Interactivos</h4>
                         <ul>
-                            <li>Integración con Google Maps API y Leaflet.js</li>
-                            <li>visualización dinámica de epicentros con marcadores personalizados</li>
-                            <li>Sistema de polling y WebSockets para mantener la información sísmica actualizada</li>
+                            <li>Integración con Leaflet.js</li>
+                            <li>Visualización dinámica de epicentros con marcadores personalizados</li>
+                            <li>Sistema de polling para mantener la información sísmica actualizada</li>
                         </ul>
                     </div>
                     <div class="audience-card">
                         <h4>Sistema de Autenticación</h4>
                         <ul>
                             <li>Almacenamiento seguro y escalable de usuarios</li>
-                            <li>diferentes niveles de acceso administrativo</li>
-                            <li>consultas optimizadas de alto rendimiento</li>
+                            <li>Diferentes niveles de acceso administrativo</li>
+                            <li>Consultas optimizadas de alto rendimiento</li>
                         </ul>
                     </div>
                 </div>

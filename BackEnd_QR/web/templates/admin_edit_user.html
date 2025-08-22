@@ -11,6 +11,11 @@
 <body>
     <div class="edit-user-container">
         <h2 class="edit-user-title">Editar Usuario</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message|escape }}</div>
+            {% endfor %}
+        {% endif %}
         <form method="post" class="edit-user-form">
             {% csrf_token %}
             <label for="name">Nombre</label>

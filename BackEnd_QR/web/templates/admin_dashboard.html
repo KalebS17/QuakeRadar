@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
     <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
@@ -8,6 +9,7 @@
     <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -20,18 +22,24 @@
                 <div class="flex items-center gap-4 text-[#0e1b18]">
                     <div class="size-4">
                         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z"
-                                fill="currentColor"></path>
+                            <path d="M42.4379 44C42.4379 44 36.0744 33.9038 41.1692 24C46.8624 12.9336 42.2078 4 42.2078 4L7.01134 4C7.01134 4 11.6577 12.932 5.96912 23.9969C0.876273 33.9029 7.27094 44 7.27094 44L42.4379 44Z" fill="currentColor"></path>
                         </svg>
                     </div>
-                    <h2 class="text-[#0e1b18] text-lg font-bold leading-tight tracking-[-0.015em]">Admin {{ request.user.get_full_name|default:request.user.username }}</h2>
+                    <h2 class="text-[#0e1b18] text-lg font-bold leading-tight tracking-[-0.015em]">
+                        Admin {{ request.user.get_full_name|default_if_none:request.user.username|default_if_none:request.user.email|default:"Usuario" }}
+                    </h2>
                 </div>
                 <div class="flex flex-1 justify-end gap-8">
                     <div class="flex items-center gap-9">
-                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'index' %}">Inicio</a>
-                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'user_edit' %}">Perfil</a>
-                        <a class="text-[#0e1b18] text-sm font-medium leading-normal" href="{% url 'mapa' %}">Mapa</a>
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal flex items-center gap-1" href="{% url 'index' %}">
+                            <i class="fa fa-home"></i> Inicio
+                        </a>
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal flex items-center gap-1" href="{% url 'mapa' %}">
+                            <i class="fa fa-map"></i> Mapa
+                        </a>
+                        <a class="text-[#0e1b18] text-sm font-medium leading-normal flex items-center gap-1" href="{% url 'user_edit' %}">
+                            <i class="fa fa-user"></i> Perfil
+                        </a>
                     </div>
                     <button
                         class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-[#e7f3f0] text-[#0e1b18] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
@@ -44,9 +52,19 @@
                             </svg>
                         </div>
                     </button>
-                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                        style='background-image: url("{{ request.user.profile.foto.url|default:'/static/images/default_avatar.png' }}");'>
-                    </div>
+                    {% if request.user.profile.foto.url %}
+                        {% with foto_url=request.user.profile.foto.url %}
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                                style="background-image: url({{ foto_url }});">
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        {% with foto_url=static 'images/default_avatar.png' %}
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
+                                style="background-image: url({{ foto_url }});">
+                            </div>
+                        {% endwith %}
+                    {% endif %}
                 </div>
             </header>
             <div class="px-40 flex flex-1 justify-center py-5">
@@ -84,25 +102,37 @@
                                 <tbody>
                                     {% for user in visiting_users %}
                                     <tr class="border-t border-t-[#d0e7e2]">
-                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-120 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             {{ user.id }}
                                         </td>
-                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             {{ user.name }}
                                         </td>
-                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             {{ user.email }}
                                         </td>
-                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-480 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
                                             -
                                         </td>
-                                        <td class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            <form method="get" action="{% url 'editar_usuario_admin' user.id user.fuente %}" style="display:inline;">
-                                                <button type="submit" class="text-blue-600 hover:underline mr-2">Editar</button>
+                                        <td
+                                            class="table-e3f17f25-5077-4c4c-a7f7-31a49f3e67d9-column-600 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            <form method="get"
+                                                action="{% url 'editar_usuario_admin' user.id user.fuente %}"
+                                                style="display:inline;">
+                                                <button type="submit"
+                                                    class="text-blue-600 hover:underline mr-2">Editar</button>
                                             </form>
-                                            <form method="post" action="{% url 'eliminar_usuario' user.id user.fuente %}" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
+                                            <form method="post"
+                                                action="{% url 'eliminar_usuario' user.id user.fuente %}"
+                                                style="display:inline;"
+                                                onsubmit="return confirm('¿Seguro que deseas eliminar este usuario?');">
                                                 {% csrf_token %}
-                                                <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                                <button type="submit"
+                                                    class="text-red-600 hover:underline">Eliminar</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -152,28 +182,49 @@
                             <table class="flex-1">
                                 <thead>
                                     <tr class="bg-[#f8fcfb]">
-                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Título</th>
-                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Autor</th>
-                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">Fecha</th>
-                                        <th class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">Acciones</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Título</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Autor</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 px-4 py-3 text-left text-[#0e1b18] w-[400px] text-sm font-medium leading-normal">
+                                            Fecha</th>
+                                        <th
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 px-4 py-3 text-left text-[#0e1b18] w-60 text-[#4e9788] text-sm font-medium leading-normal">
+                                            Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for noticia in noticias %}
                                     <tr class="border-t border-t-[#d0e7e2]">
-                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">{{ noticia.titulo }}</td>
-                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">{{ noticia.autor }}</td>
-                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">{{ noticia.fecha_publicacion|date:'Y-m-d H:i' }}</td>
-                                        <td class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
-                                            <a href="{% url 'admin_edit_news' noticia.id %}" class="text-blue-600 hover:underline mr-2">Editar</a>
-                                            <form method="post" action="{% url 'admin_delete_news' noticia.id %}" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar esta noticia?');">
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-120 h-[72px] px-4 py-2 w-[400px] text-[#0e1b18] text-sm font-normal leading-normal">
+                                            {{ noticia.titulo }}</td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-240 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ noticia.autor }}</td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-360 h-[72px] px-4 py-2 w-[400px] text-[#4e9788] text-sm font-normal leading-normal">
+                                            {{ noticia.fecha_publicacion|date:'Y-m-d H:i' }}</td>
+                                        <td
+                                            class="table-9a21ef55-9434-4fed-9967-e4eee9d060f3-column-480 h-[72px] px-4 py-2 w-60 text-[#4e9788] text-sm font-bold leading-normal tracking-[0.015em]">
+                                            <a href="{% url 'admin_edit_news' noticia.id %}"
+                                                class="text-blue-600 hover:underline mr-2">Editar</a>
+                                            <form method="post" action="{% url 'admin_delete_news' noticia.id %}"
+                                                style="display:inline;"
+                                                onsubmit="return confirm('¿Seguro que deseas eliminar esta noticia?');">
                                                 {% csrf_token %}
-                                                <button type="submit" class="text-red-600 hover:underline">Eliminar</button>
+                                                <button type="submit"
+                                                    class="text-red-600 hover:underline">Eliminar</button>
                                             </form>
                                         </td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="4" class="text-center">No hay noticias registradas.</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center">No hay noticias registradas.</td>
+                                    </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>

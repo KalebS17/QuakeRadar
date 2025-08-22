@@ -57,8 +57,13 @@ document.getElementById('search-form').addEventListener('submit', function (e) {
 });
 
 // Obtener datos de terremotos
-async function fetchEarthquakeData() {
-  const response = await fetch('/fetch_earthquake_data/');
+// Obtener datos de terremotos (opcionalmente por rango de fechas)
+async function fetchEarthquakeData(dateFrom, dateTo) {
+  let url = '/fetch_earthquake_data/';
+  if (dateFrom && dateTo) {
+    url += `?date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(dateTo)}`;
+  }
+  const response = await fetch(url);
   const data = await response.json();
   return data.earthquakes;
 }
@@ -69,16 +74,34 @@ function addEarthquakeMarkers(earthquakes) {
   earthquakeMarkers.clearLayers();
   const bounds = [];
 
+  // Función para escapar HTML especial
+  function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[&<>"']/g, function (c) {
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]);
+    });
+  }
   earthquakes.forEach(earthquake => {
     const [lon, lat, depth] = earthquake.coordinates;
+    // Formatear fecha y hora
+    let fechaHora = '';
+    if (earthquake.time) {
+      try {
+        const dateObj = new Date(earthquake.time);
+        fechaHora = dateObj.toLocaleString('es-CR', { hour12: false });
+      } catch (e) {
+        fechaHora = escapeHTML(earthquake.time);
+      }
+    }
     const marker = L.marker([lat, lon], { icon: redIcon });
     marker.bindPopup(`
       <strong>Detalles del terremoto:</strong><br>
-      ID: ${earthquake.id}<br>
-      Magnitud: ${earthquake.mag}<br>
-      Lugar: ${earthquake.place}<br>
-      Tipo: ${earthquake.type}<br>
-      Profundidad: ${depth} km<br>
+      ID: ${escapeHTML(earthquake.id)}<br>
+      Magnitud: ${escapeHTML(earthquake.mag)}<br>
+      Lugar: ${escapeHTML(earthquake.place)}<br>
+      Tipo: ${escapeHTML(earthquake.type)}<br>
+      Profundidad: ${escapeHTML(depth)} km<br>
+      <span><strong>Fecha y hora:</strong> ${fechaHora}</span>
     `);
     earthquakeMarkers.addLayer(marker);
     bounds.push([lat, lon]);
@@ -115,23 +138,54 @@ document.addEventListener('click', (e) => {
 document.getElementById('filter-form').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const date = document.getElementById('filter-date').value;
+  const dateFrom = document.getElementById('filter-date-from').value;
+  const dateTo = document.getElementById('filter-date-to').value;
   const magnitude = parseFloat(document.getElementById('filter-magnitude').value);
   const location = document.getElementById('filter-location').value.toLowerCase();
 
-  const earthquakes = await fetchEarthquakeData();
+  // Validación de fechas
+  if (dateFrom && dateTo) {
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+    const diffDays = (to - from) / (1000 * 60 * 60 * 24);
+    if (from > to) {
+      alert('La fecha "Desde" no puede ser mayor que la fecha "Hasta".');
+      return;
+    }
+    if (diffDays > 3) {
+      alert('El rango máximo permitido es de 3 días.');
+      return;
+    }
+  }
+
+  // Llamar a la API con el rango de fechas si se especifica
+  let earthquakes = [];
+  if (dateFrom && dateTo) {
+    earthquakes = await fetchEarthquakeData(dateFrom, dateTo);
+  } else {
+    earthquakes = await fetchEarthquakeData();
+  }
 
   let filtered = earthquakes;
-
-  if (date) filtered = filtered.filter(eq => new Date(eq.time) >= new Date(date));
   if (!isNaN(magnitude)) filtered = filtered.filter(eq => eq.mag >= magnitude);
-  if (location) filtered = filtered.filter(eq => eq.place.toLowerCase().includes(location));
-
+  if (location) filtered = filtered.filter(eq => (eq.place || '').toLowerCase().includes(location));
   filtered.sort((a, b) => b.mag - a.mag);
 
   earthquakeMarkers.clearLayers();
   addEarthquakeMarkers(filtered);
+  filterPopup.style.display = 'none';
+});
 
+// Botón para limpiar filtros y volver a la vista por defecto
+document.getElementById('clear-filters-btn').addEventListener('click', async () => {
+  document.getElementById('filter-date-from').value = '';
+  document.getElementById('filter-date-to').value = '';
+  document.getElementById('filter-magnitude').value = '';
+  document.getElementById('filter-location').value = '';
+  // Cargar sismos del último día
+  const earthquakes = await fetchEarthquakeData();
+  earthquakeMarkers.clearLayers();
+  addEarthquakeMarkers(earthquakes);
   filterPopup.style.display = 'none';
 });
 
@@ -149,18 +203,32 @@ let _liveTimer = null;
 //Funcion para refrescar los terremotos 
 async function _refreshEarthquakesApplyingActiveFilters() {
 
-  const earthquakes = await fetchEarthquakeData();
-
-  // Reusar los filtros actuales si el usuario los tiene activos
-  const dateInput = document.getElementById('filter-date');
+  // Leer filtros activos
+  const dateFromInput = document.getElementById('filter-date-from');
+  const dateToInput = document.getElementById('filter-date-to');
   const magInput = document.getElementById('filter-magnitude');
   const locInput = document.getElementById('filter-location');
-  const date = dateInput ? dateInput.value : '';
+  const dateFrom = dateFromInput ? dateFromInput.value : '';
+  const dateTo = dateToInput ? dateToInput.value : '';
   const magnitude = magInput && magInput.value !== '' ? parseFloat(magInput.value) : NaN;
   const location = locInput ? locInput.value.trim().toLowerCase() : '';
 
+  let earthquakes = [];
+  if (dateFrom && dateTo) {
+    earthquakes = await fetchEarthquakeData(dateFrom, dateTo);
+  } else {
+    earthquakes = await fetchEarthquakeData();
+  }
+
   let filtered = earthquakes;
-  if (date) filtered = filtered.filter(eq => new Date(eq.time) >= new Date(date));
+  if (dateFrom && dateTo) {
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+    filtered = filtered.filter(eq => {
+      const eqDate = new Date(eq.time);
+      return eqDate >= from && eqDate <= to;
+    });
+  }
   if (!isNaN(magnitude)) filtered = filtered.filter(eq => eq.mag >= magnitude);
   if (location) filtered = filtered.filter(eq => (eq.place || '').toLowerCase().includes(location));
   filtered.sort((a, b) => b.mag - a.mag);
