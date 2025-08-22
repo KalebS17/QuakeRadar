@@ -59,11 +59,9 @@
                             </div>
                         {% endwith %}
                     {% else %}
-                        {% with foto_url=static 'images/default_avatar.png' %}
                             <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                                style="background-image: url({{ foto_url }});">
+                                style="background-image: url({% static 'images/default_avatar.png' %});">
                             </div>
-                        {% endwith %}
                     {% endif %}
                 </div>
             </header>
